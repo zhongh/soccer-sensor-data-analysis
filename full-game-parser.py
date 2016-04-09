@@ -3,6 +3,7 @@ __author__ = 'Hao'
 import argparse
 import time
 from math import *
+from helpers import *
 
 #######################################
 # Ontology variables
@@ -23,44 +24,51 @@ BALL_SIDS = ["4", "8", "10"]
 NOT_NEEDED_IDS = REFEREE_IDS + GLOVE_IDS
 
 SID_MAP = {
+    # Referee:
+    "105": {"type": "referee", "label": "Referee", "leg": "left"},
+    "106": {"type": "referee", "label": "Referee", "leg": "right"},
     # Balls:
-    "4":  {"type": "ball", "label": "ball004"},
-    "8":  {"type": "ball", "label": "ball008"},
-    "10": {"type": "ball", "label": "ball010"},
+    "4":  {"type": "ball", "label": "Ball004"},
+    "8":  {"type": "ball", "label": "Ball008"},
+    "10": {"type": "ball", "label": "Ball010"},
     # Team A:
-    "13": {"type": "player", "team": "A", "label": "playerA1", "name": "Nick Gertje", "leg": "left"},
-    "14": {"type": "player", "team": "A", "label": "playerA1", "name": "Nick Gertje", "leg": "right"},
-    "47": {"type": "player", "team": "A", "label": "playerA2", "name": "Dennis Dotterweich", "leg": "left"},
-    "16": {"type": "player", "team": "A", "label": "playerA2", "name": "Dennis Dotterweich", "leg": "right"},
-    "49": {"type": "player", "team": "A", "label": "playerA3", "name": "Niklas Waelzlein", "leg": "left"},
-    "88": {"type": "player", "team": "A", "label": "playerA3", "name": "Niklas Waelzlein", "leg": "right"},
-    "19": {"type": "player", "team": "A", "label": "playerA4", "name": "Wili Sommer", "leg": "left"},
-    "52": {"type": "player", "team": "A", "label": "playerA4", "name": "Wili Sommer", "leg": "right"},
-    "53": {"type": "player", "team": "A", "label": "playerA5", "name": "Philipp Harlass", "leg": "left"},
-    "54": {"type": "player", "team": "A", "label": "playerA5", "name": "Philipp Harlass", "leg": "right"},
-    "23": {"type": "player", "team": "A", "label": "playerA6", "name": "Roman Hartleb", "leg": "left"},
-    "24": {"type": "player", "team": "A", "label": "playerA6", "name": "Roman Hartleb", "leg": "right"},
-    "57": {"type": "player", "team": "A", "label": "playerA7", "name": "Erik Engelhardt", "leg": "left"},
-    "58": {"type": "player", "team": "A", "label": "playerA7", "name": "Erik Engelhardt", "leg": "right"},
-    "59": {"type": "player", "team": "A", "label": "playerA8", "name": "Sandro Schneider", "leg": "left"},
-    "28": {"type": "player", "team": "A", "label": "playerA8", "name": "Sandro Schneider", "leg": "right"},
+    "97": {"type": "keeper", "team": "A", "label": "PlayerA1", "name": "Nick Gertje", "arm": "left"},
+    "98": {"type": "keeper", "team": "A", "label": "PlayerA1", "name": "Nick Gertje", "arm": "right"},
+    "13": {"type": "player", "team": "A", "label": "PlayerA1", "name": "Nick Gertje", "leg": "left"},
+    "14": {"type": "player", "team": "A", "label": "PlayerA1", "name": "Nick Gertje", "leg": "right"},
+    "47": {"type": "player", "team": "A", "label": "PlayerA2", "name": "Dennis Dotterweich", "leg": "left"},
+    "16": {"type": "player", "team": "A", "label": "PlayerA2", "name": "Dennis Dotterweich", "leg": "right"},
+    "49": {"type": "player", "team": "A", "label": "PlayerA3", "name": "Niklas Waelzlein", "leg": "left"},
+    "88": {"type": "player", "team": "A", "label": "PlayerA3", "name": "Niklas Waelzlein", "leg": "right"},
+    "19": {"type": "player", "team": "A", "label": "PlayerA4", "name": "Wili Sommer", "leg": "left"},
+    "52": {"type": "player", "team": "A", "label": "PlayerA4", "name": "Wili Sommer", "leg": "right"},
+    "53": {"type": "player", "team": "A", "label": "PlayerA5", "name": "Philipp Harlass", "leg": "left"},
+    "54": {"type": "player", "team": "A", "label": "PlayerA5", "name": "Philipp Harlass", "leg": "right"},
+    "23": {"type": "player", "team": "A", "label": "PlayerA6", "name": "Roman Hartleb", "leg": "left"},
+    "24": {"type": "player", "team": "A", "label": "PlayerA6", "name": "Roman Hartleb", "leg": "right"},
+    "57": {"type": "player", "team": "A", "label": "PlayerA7", "name": "Erik Engelhardt", "leg": "left"},
+    "58": {"type": "player", "team": "A", "label": "PlayerA7", "name": "Erik Engelhardt", "leg": "right"},
+    "59": {"type": "player", "team": "A", "label": "PlayerA8", "name": "Sandro Schneider", "leg": "left"},
+    "28": {"type": "player", "team": "A", "label": "PlayerA8", "name": "Sandro Schneider", "leg": "right"},
     # Team B:
-    "61": {"type": "player", "team": "B", "label": "playerB1", "name": "Leon Krapf", "leg": "left"},
-    "62": {"type": "player", "team": "B", "label": "playerB1", "name": "Leon Krapf", "leg": "right"},
-    "63": {"type": "player", "team": "B", "label": "playerB2", "name": "Kevin Baer", "leg": "left"},
-    "64": {"type": "player", "team": "B", "label": "playerB2", "name": "Kevin Baer", "leg": "right"},
-    "65": {"type": "player", "team": "B", "label": "playerB3", "name": "Luca Ziegler", "leg": "left"},
-    "66": {"type": "player", "team": "B", "label": "playerB3", "name": "Luca Ziegler", "leg": "right"},
-    "67": {"type": "player", "team": "B", "label": "playerB4", "name": "Ben Mueller", "leg": "left"},
-    "68": {"type": "player", "team": "B", "label": "playerB4", "name": "Ben Mueller", "leg": "right"},
-    "69": {"type": "player", "team": "B", "label": "playerB5", "name": "Vale Reitstetter", "leg": "left"},
-    "38": {"type": "player", "team": "B", "label": "playerB5", "name": "Vale Reitstetter", "leg": "right"},
-    "71": {"type": "player", "team": "B", "label": "playerB6", "name": "Christopher Lee", "leg": "left"},
-    "40": {"type": "player", "team": "B", "label": "playerB6", "name": "Christopher Lee", "leg": "right"},
-    "73": {"type": "player", "team": "B", "label": "playerB7", "name": "Leon Heinze", "leg": "left"},
-    "74": {"type": "player", "team": "B", "label": "playerB7", "name": "Leon Heinze", "leg": "right"},
-    "75": {"type": "player", "team": "B", "label": "playerB8", "name": "Leo Langhans", "leg": "left"},
-    "44": {"type": "player", "team": "B", "label": "playerB8", "name": "Leo Langhans", "leg": "right"}
+    "99": {"type": "keeper", "team": "B", "label": "PlayerB1", "name": "Leon Krapf", "arm": "left"},
+    "100": {"type": "keeper", "team": "B", "label": "PlayerB1", "name": "Leon Krapf", "arm": "right"},
+    "61": {"type": "player", "team": "B", "label": "PlayerB1", "name": "Leon Krapf", "leg": "left"},
+    "62": {"type": "player", "team": "B", "label": "PlayerB1", "name": "Leon Krapf", "leg": "right"},
+    "63": {"type": "player", "team": "B", "label": "PlayerB2", "name": "Kevin Baer", "leg": "left"},
+    "64": {"type": "player", "team": "B", "label": "PlayerB2", "name": "Kevin Baer", "leg": "right"},
+    "65": {"type": "player", "team": "B", "label": "PlayerB3", "name": "Luca Ziegler", "leg": "left"},
+    "66": {"type": "player", "team": "B", "label": "PlayerB3", "name": "Luca Ziegler", "leg": "right"},
+    "67": {"type": "player", "team": "B", "label": "PlayerB4", "name": "Ben Mueller", "leg": "left"},
+    "68": {"type": "player", "team": "B", "label": "PlayerB4", "name": "Ben Mueller", "leg": "right"},
+    "69": {"type": "player", "team": "B", "label": "PlayerB5", "name": "Vale Reitstetter", "leg": "left"},
+    "38": {"type": "player", "team": "B", "label": "PlayerB5", "name": "Vale Reitstetter", "leg": "right"},
+    "71": {"type": "player", "team": "B", "label": "PlayerB6", "name": "Christopher Lee", "leg": "left"},
+    "40": {"type": "player", "team": "B", "label": "PlayerB6", "name": "Christopher Lee", "leg": "right"},
+    "73": {"type": "player", "team": "B", "label": "PlayerB7", "name": "Leon Heinze", "leg": "left"},
+    "74": {"type": "player", "team": "B", "label": "PlayerB7", "name": "Leon Heinze", "leg": "right"},
+    "75": {"type": "player", "team": "B", "label": "PlayerB8", "name": "Leo Langhans", "leg": "left"},
+    "44": {"type": "player", "team": "B", "label": "PlayerB8", "name": "Leo Langhans", "leg": "right"}
 }
 
 #######################################
@@ -68,6 +76,8 @@ SID_MAP = {
 
 INITIAL_TIME = 10629342490369879
 APPROXIMATE_START_TIME = 119
+
+BALL_CONTROL_DISTANCE = 2000
 
 # Suggested coordinates for the field of play: (0,33965), (0,-33960),(52483,33965),(52483,-33960)
 #
@@ -86,7 +96,6 @@ Y_MAX = 33965
 # Team B is the red team and team A is the yellow team
 GOAL_LINE_A = Y_MIN
 GOAL_LINE_B = Y_MAX
-# ===> NEED TO IMPLEMENT THIS NEXT
 
 #######################################
 # Helper functions
@@ -106,9 +115,6 @@ def get_average(a, b):
 def get_distance(a, b):
     return sqrt((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2 + (a[2] - b[2]) ** 2)
 
-
-def display_seconds_as_minutes(t):
-    return str(floor(t / 60)) + ":" + str(round(t % 60, 3))
 
 
 def print_list_with_linebreak(list):
@@ -144,9 +150,12 @@ def main():
 
         count = 0
 
-        # Keep track of ball and player informations
+        # Keep track of ball, player informations
         balls = {}
         players = {}
+        teams = {}
+
+        # Setting up players and balls
         for sid in SID_MAP:
             if SID_MAP[sid]["type"] is "ball":
                 balls[SID_MAP[sid]["label"]] = {
@@ -166,11 +175,16 @@ def main():
                     "distance-to-ball": 888888,
                     "challenging-opponent": None
                 }
+        # Setting up teams
+        teams = {
+            "A": {"label": "TeamA", "is-attacking": None, "second-last-player": None, "goal-line": Y_MIN, "sign": +1},
+            "B": {"label": "TeamB", "is-attacking": None, "second-last-player": None, "goal-line": Y_MAX, "sign": -1}
+        }
 
 
-        while count < 3500000:
+        game_status = False
 
-            line = f.readline()
+        for line in f:
 
             count += 1
 
@@ -182,112 +196,247 @@ def main():
 
             # Format time from picosends into MM:SS
             tmp_t = (int(words[1]) - INITIAL_TIME) * 1e-12 - APPROXIMATE_START_TIME
+            tmp_t_str = display_seconds_as_minutes(tmp_t)
             if tmp_t < 0:
                 print(words[1])
                 continue
+            if tmp_t > 180:
+                break
             if tmp_t > 1809:
                 break
 
             # Type int for coordinates
             tmp_location = tuple(int(x) for x in words[2:5])
 
-            # When ball data comes in:
-            if words[0] in BALL_SIDS:
-                if is_out(tmp_location) and balls[SID_MAP[words[0]]["label"]]["ball-in"]:
-                    balls[SID_MAP[words[0]]["label"]]["ball-in"] = False
-                    # players[balls[SID_MAP[words[0]]["label"]]["player"]]["ball-possession"] = False
-                    for p in players: players[p]["ball-possession"] = False
-                    balls[SID_MAP[words[0]]["label"]]["player"] = None
-                    print("<--------- Ball " + SID_MAP[words[0]]["label"] + " goes out of bounds at " + display_seconds_as_minutes(tmp_t))
-                    continue
-                elif not is_out(tmp_location):
-                    balls[SID_MAP[words[0]]["label"]]["location"] = tmp_location
-                    if not balls[SID_MAP[words[0]]["label"]]["ball-in"]:
-                        balls[SID_MAP[words[0]]["label"]]["ball-in"] = True
-                        print("---------> Ball " + SID_MAP[words[0]]["label"] + " goes into the field at " + display_seconds_as_minutes(tmp_t))
+            # Sensor bearer type
+            tmp_type = SID_MAP[words[0]]["type"]
 
-                    # Find the player that is the closest to the ball
+            # When ball data comes in:
+            if tmp_type == "ball":
+
+                this_ball = SID_MAP[words[0]]["label"]
+
+                # If the ball is OUT
+                if is_out(tmp_location):
+
+                    game_status = False
+
+                    # If the ball was IN
+                    if balls[this_ball]["ball-in"]:
+                        # Update ball status
+                        balls[this_ball]["ball-in"] = False
+                        print("\n<<<<<<<<<<<< " + this_ball + " goes out of bounds at " + tmp_t_str + "\n")
+
+                        # Also set corresponding player and ball status to False or None, and print out end statements!!! ball-player, player-player, and offsides
+
+                        # Ball-Player:
+                        # If the ball was controlled previously by a player, make the change and output an end statement
+                        if balls[this_ball]["player"]:
+                            assert(players[balls[this_ball]["player"]]["ball-possession"])
+                            print(",".join([":" + balls[this_ball]["player"], ":touches", ":" + this_ball, "end", tmp_t_str]))
+                            players[balls[this_ball]["player"]]["ball-possession"] = False
+                            balls[this_ball]["player"] = None
+
+                        # Player-player
+                        for player in players:
+                            # If the player was challenging someone previously, remove that previous opponnent and make an end statement
+                            if players[player]["challenging-opponent"]:
+                                print(",".join([":" + player, ":challenges", ":" + players[player]["challenging-opponent"], "end", tmp_t_str]))
+                                players[players[player]["challenging-opponent"]]["challenging-opponent"] = None
+                                players[player]["challenging-opponent"] = None
+
+
+                        # Second last player
+                        for team in teams:
+                            if teams[team]["second-last-player"] != None:
+                                print(",".join([":" + teams[team]["second-last-player"], ":isA", ":SecondLastPlayer", "end", tmp_t_str]))
+                                teams[team]["second-last-player"] = None
+
+
+
+
+                        # if balls[this_ball]["player"]:
+                        #     players[balls[this_ball]["player"]]["ball-possession"] = False
+                        #     balls[this_ball]["player"] = None
+                        continue
+                    # Else, the ball was OUT, too, do nothing and continue
+                    else:
+                        continue
+
+                # If the ball is IN
+                else:
+
+                    game_status = True
+
+                    # Update the ball location
+                    balls[this_ball]["location"] = tmp_location
+
+                    # If the ball was OUT
+                    if not balls[this_ball]["ball-in"]:
+                        balls[this_ball]["ball-in"] = True
+                        print("\n>>>>>>>>>>>>>> " + this_ball + " goes into the field at " + tmp_t_str + "\n")
+                    # Else, the ball was IN, do nothing
+
+                    ###############################################
+                    # Identify ball-player interference:
+                    #
+
+                    # Update each players distance to ball:
                     for p in players:
                         players[p]["distance-to-ball"] = get_distance(players[p]["location"], tmp_location)
+
+                    # Find the player that is the closest to the ball
                     players_sorted = sorted(players.items(), key=lambda x: x[1]["distance-to-ball"])
+                    nearest_player = players_sorted[0][0]
+                    nearest_distance = players_sorted[0][1]["distance-to-ball"]
+
 
                     # If the nearest player has >= 2000mm to the ball then nobody has the ball
-                    if players_sorted[0][1]["distance-to-ball"] >= 2000:
+                    if nearest_distance >= BALL_CONTROL_DISTANCE:
                         # If the ball was controlled previously by a player, make the change and output an end output
-                        if balls[SID_MAP[words[0]]["label"]]["player"]:
-                            assert(players[balls[SID_MAP[words[0]]["label"]]["player"]]["ball-possession"])
-                            players[balls[SID_MAP[words[0]]["label"]]["player"]]["ball-possession"] = False
-                            print(",".join([balls[SID_MAP[words[0]]["label"]]["player"], "touch", SID_MAP[words[0]]["label"], "end", display_seconds_as_minutes(tmp_t)]))
-                            balls[SID_MAP[words[0]]["label"]]["player"] = None
+                        if balls[this_ball]["player"]:
+                            assert(players[balls[this_ball]["player"]]["ball-possession"])
+                            print(",".join([":" + balls[this_ball]["player"], ":touches", ":" + this_ball, "end", tmp_t_str]))
+                            players[balls[this_ball]["player"]]["ball-possession"] = False
+                            balls[this_ball]["player"] = None
                         # If the ball was NOT controlled previously by a player, do nothing
 
                     # If the nearest player has < 2000mm to the ball then he has the ball
-                    if players_sorted[0][1]["distance-to-ball"] < 2000:
+                    if nearest_distance < BALL_CONTROL_DISTANCE:
                         # If the ball was controlled by no one
-                        if not balls[SID_MAP[words[0]]["label"]]["player"]:
-                            balls[SID_MAP[words[0]]["label"]]["player"] = players_sorted[0][0]
-                            players[players_sorted[0][0]]["ball-possession"] = True
-                            print(",".join([balls[SID_MAP[words[0]]["label"]]["player"], "touch", SID_MAP[words[0]]["label"], "start", display_seconds_as_minutes(tmp_t)]))
+                        if not balls[this_ball]["player"]:
+                            balls[this_ball]["player"] = nearest_player
+                            players[nearest_player]["ball-possession"] = True
+                            print(",".join([":" + balls[this_ball]["player"], ":touches", ":" + this_ball, "begin", tmp_t_str]))
                         # Else, if the ball was controlled by someone different
-                        elif balls[SID_MAP[words[0]]["label"]]["player"] != players_sorted[0][0]:
-                            print(",".join([balls[SID_MAP[words[0]]["label"]]["player"], "touch", SID_MAP[words[0]]["label"], "end", display_seconds_as_minutes(tmp_t)]))
-                            balls[SID_MAP[words[0]]["label"]]["player"] = players_sorted[0][0]
-                            players[balls[SID_MAP[words[0]]["label"]]["player"]]["ball-possession"] = False
-                            players[players_sorted[0][0]]["ball-possession"] = True
-                            print(",".join([balls[SID_MAP[words[0]]["label"]]["player"], "touch", SID_MAP[words[0]]["label"], "start", display_seconds_as_minutes(tmp_t)]))
+                        elif balls[this_ball]["player"] != nearest_player:
+                            print(",".join([":" + balls[this_ball]["player"], ":touches", ":" + this_ball, "end", tmp_t_str]))
+                            players[balls[this_ball]["player"]]["ball-possession"] = False
+                            balls[this_ball]["player"] = nearest_player
+                            players[nearest_player]["ball-possession"] = True
+                            print(",".join([":" + balls[this_ball]["player"], ":touches", ":" + this_ball, "begin", tmp_t_str]))
                         # Else, if the ball was controlled by same player, do nothing
-                        elif balls[SID_MAP[words[0]]["label"]]["player"] == players_sorted[0][0]:
+                        elif balls[this_ball]["player"] == nearest_player:
                             pass
+                    #
+                    #
+                    ###############################################
+
 
             # When player data comes in:
-            else:
+            elif tmp_type == "player":
+
+                # Turn this back on when making sure end statements are printed when ball goes out of bounds
+                # if game_status == False:
+                #     continue
+
                 this_player = SID_MAP[words[0]]["label"]
+                this_leg = SID_MAP[words[0]]["leg"]
+                this_team = SID_MAP[words[0]]["team"]
+
                 # Update player location
-                players[this_player][SID_MAP[words[0]]["leg"]] = tmp_location
+                players[this_player][this_leg] = tmp_location
                 players[this_player]["location"] = get_average(players[this_player]["left"], players[this_player]["right"])
+
+                # Identify second last player of his team
+                if game_status:
+                    second_last_player = sorted([(k, v) for (k, v) in players.items() if v["team"] == this_team], key=lambda p: (p[1]["location"][1] - teams[this_team]["goal-line"]) * teams[this_team]["sign"])[1][0]
+                    if teams[this_team]["second-last-player"] != second_last_player:
+                        if teams[this_team]["second-last-player"] != None:
+                            print(",".join([":" + teams[this_team]["second-last-player"], ":isA", ":SecondLastPlayer", "end", tmp_t_str]))
+                        teams[this_team]["second-last-player"] = second_last_player
+                        print(",".join([":" + teams[this_team]["second-last-player"], ":isA", ":SecondLastPlayer", "begin", tmp_t_str]))
+                    else:
+                        pass
+
+                ###############################################
                 # Check if player challenges an opponent
-                # Find the opponent that is the closest to the player
-                nearest_opponent = None
-                nearest_distance = 888888
-                distance = 888888
-                for p in players:
-                    if players[p]["team"] != players[this_player]["team"]:
+                #
+
+                # A player must not challenge an opponent when the game is off or when he has ball possession:
+                if game_status and (not players[this_player]["ball-possession"]):
+
+                    # Find the opponent that is the closest to the player
+                    nearest_opponent = None
+                    nearest_distance = 888888
+                    distance = 888888
+                    for p in {k:v for (k,v) in players.items() if v["team"] != this_team}:
+                        # if players[p]["team"] != players[this_player]["team"]:
                         distance = get_distance(players[p]["location"], players[this_player]["location"])
                         if distance < nearest_distance:
                             nearest_distance = distance
                             nearest_opponent = p
-                # If the distance is close, then they are challengeing
-                if nearest_distance < 750:
-                    # If this player is not challenging previously, then add them
-                    if not players[this_player]["challenging-opponent"]:
-                        players[this_player]["challenging-opponent"] = nearest_opponent
-                        players[nearest_opponent]["challenging-opponent"] = this_player
-                        print(nearest_distance)
-                        print(",".join([this_player, "challenges", nearest_opponent, "start", display_seconds_as_minutes(tmp_t)]))
-                    # Else, if this player is challenging a different player previously, we switch
-                    elif players[SID_MAP[words[0]]["label"]]["challenging-opponent"] != nearest_opponent:
-                        print(nearest_distance)
-                        print(",".join([this_player, "challenges", players[this_player]["challenging-opponent"], "end", display_seconds_as_minutes(tmp_t)]))
-                        players[this_player]["challenging-opponent"] = nearest_opponent
-                        players[nearest_opponent]["challenging-opponent"] = this_player
-                        print(",".join([this_player, "challenges", nearest_opponent, "start", display_seconds_as_minutes(tmp_t)]))
-                    # Else, if this player is challenging the same player, do nothing
+
+                    # If the distance is close, then they are challengeing
+                    if nearest_distance < 750:
+                        # If this player is not challenging previously, then add them
+                        if not players[this_player]["challenging-opponent"]:
+                            players[this_player]["challenging-opponent"] = nearest_opponent
+                            players[nearest_opponent]["challenging-opponent"] = this_player
+                            print(",".join([":" + this_player, ":challenges", ":" + nearest_opponent, "start", tmp_t_str]))
+                        # Else, if this player is challenging a different player previously, we switch
+                        elif players[this_player]["challenging-opponent"] != nearest_opponent:
+                            print(",".join([":" + this_player, ":challenges", ":" + players[this_player]["challenging-opponent"], "end", tmp_t_str]))
+                            players[this_player]["challenging-opponent"] = nearest_opponent
+                            players[nearest_opponent]["challenging-opponent"] = this_player
+                            print(",".join([":" + this_player, ":challenges", ":" + nearest_opponent, "start", tmp_t_str]))
+                        # Else, if this player is challenging the same player, do nothing
+                        else:
+                            pass
+                    # Else, the distance is not close enough:
                     else:
-                        pass
-                # Else, if the distance is not close enough:
-                else:
-                    # If the player was challenging someone previously, remove that previous opponnent
-                    if players[this_player]["challenging-opponent"]:
-                        print(nearest_distance)
-                        print(",".join([this_player, "challenges", players[this_player]["challenging-opponent"], "end", display_seconds_as_minutes(tmp_t)]))
-                        players[players[this_player]["challenging-opponent"]]["challenging-opponent"] = None
-                        players[SID_MAP[words[0]]["label"]]["challenging-opponent"] = None
-                    # If the player was not challenging someone previously, do nothing
+                        # If the player was challenging someone previously, remove that previous opponnent
+                        if players[this_player]["challenging-opponent"]:
+                            print(",".join([":" + this_player, ":challenges", ":" + players[this_player]["challenging-opponent"], "end", tmp_t_str]))
+                            players[players[this_player]["challenging-opponent"]]["challenging-opponent"] = None
+                            players[this_player]["challenging-opponent"] = None
+                        # If the player was not challenging someone previously, do nothing
 
 
+        # print(players)
+        # print(teams)
         print("Total computation time elapsed: " + str(time.time() - t) + " seconds")
 
 
-            # sorted(d.items(), key=lambda x: x[1])[0][1]
 if __name__ == "__main__":
     main()
+
+
+#
+# :PlayerB3,is,SLD,start,0:37.1333
+# :PlayerB3,is,SLD,end,0:37.1349
+# :PlayerB6,is,SLD,start,0:37.1349
+#
+# <<<<<<<<<<<< Ball004 goes out of bounds at 0:38.5965
+#
+#
+# >>>>>>>>>>>>>> Ball004 goes into the field at 0:40.4828
+#
+# :PlayerA4,:touches,:Ball004,begin,0:40.4828
+#
+# <<<<<<<<<<<< Ball004 goes out of bounds at 0:42.492
+#
+# :PlayerA4,:touches,:Ball004,end,0:42.492
+# :PlayerB6,is,SLD,end,0:42.6277
+# :PlayerB1,is,SLD,start,0:42.6277
+#
+# >>>>>>>>>>>>>> Ball004 goes into the field at 0:44.3115
+#
+# :PlayerB6,:touches,:Ball004,begin,0:44.3115
+# :PlayerB6,:touches,:Ball004,end,0:44.964
+# :PlayerB1,is,SLD,end,0:45.5176
+# :PlayerB6,is,SLD,start,0:45.5176
+# :PlayerB5,:touches,:Ball004,begin,0:45.5809
+#
+# <<<<<<<<<<<< Ball004 goes out of bounds at 0:45.7795
+#
+# :PlayerB5,:touches,:Ball004,end,0:45.7795
+#
+# >>>>>>>>>>>>>> Ball004 goes into the field at 0:47.2578
+#
+# :PlayerB6,:touches,:Ball004,begin,0:47.9391
+# :PlayerB6,:touches,:Ball004,end,0:52.5794
+# :PlayerB6,is,SLD,end,0:52.8278
+# :PlayerB3,is,SLD,start,0:52.8278
+# :PlayerB5,:touches,:Ball004,begin,0:53.476
+# :PlayerB3,is,SLD,end,0:54.3392
