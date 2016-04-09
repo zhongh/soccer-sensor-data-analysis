@@ -92,6 +92,7 @@ X_MIN = 0
 X_MAX = 52483
 Y_MIN = -33960
 Y_MAX = 33965
+HALF_LENGTH = (Y_MAX - Y_MIN) / 2
 
 # Team B is the red team and team A is the yellow team
 GOAL_LINE_A = Y_MIN
@@ -161,7 +162,8 @@ def main():
                 balls[SID_MAP[sid]["label"]] = {
                     "location": (0, 0, 0),
                     "ball-in": False,
-                    "player": None
+                    "player": None,
+                    "position": None
                 }
                 # print(balls[SID_MAP[sid]["label"]])
             elif SID_MAP[sid]["type"] is "player":
@@ -173,12 +175,14 @@ def main():
                     "right": (0, 0, 0),
                     "ball-possession": False,
                     "distance-to-ball": 888888,
-                    "challenging-opponent": None
+                    "challenging-opponent": None,
+                    "position": None,
+                    "in-offside-position": False
                 }
         # Setting up teams
         teams = {
-            "A": {"label": "TeamA", "is-attacking": None, "second-last-player": None, "goal-line": Y_MIN, "sign": +1},
-            "B": {"label": "TeamB", "is-attacking": None, "second-last-player": None, "goal-line": Y_MAX, "sign": -1}
+            "A": {"label": "TeamA", "opponent": "B", "is-attacking": None, "second-last-player": None, "goal-line": Y_MIN, "sign": +1},
+            "B": {"label": "TeamB", "opponent": "A", "is-attacking": None, "second-last-player": None, "goal-line": Y_MAX, "sign": -1}
         }
 
 
@@ -216,6 +220,10 @@ def main():
 
                 this_ball = SID_MAP[words[0]]["label"]
 
+                balls[this_ball]["position"] = "BallPosition" + words[1]
+                # print_results(this_ball, "hasPosition", balls[this_ball]["position"], "begin", tmp_t_str)
+
+
                 # If the ball is OUT
                 if is_out(tmp_location):
 
@@ -233,7 +241,12 @@ def main():
                         # If the ball was controlled previously by a player, make the change and output an end statement
                         if balls[this_ball]["player"]:
                             assert(players[balls[this_ball]["player"]]["ball-possession"])
-                            print(",".join([":" + balls[this_ball]["player"], ":touches", ":" + this_ball, "end", tmp_t_str]))
+
+                            print_results(balls[this_ball]["player"], "touches", this_ball, "end", tmp_t_str)
+                            print_results(balls[this_ball]["player"], "hasPosition", players[balls[this_ball]["player"]]["position"], "end", tmp_t_str)
+                            print_results(this_ball, "hasPosition", balls[this_ball]["position"], "end", tmp_t_str)
+                            print_results(balls[this_ball]["player"], "isInvolvedIn", "BallTouch", "end", tmp_t_str)
+
                             players[balls[this_ball]["player"]]["ball-possession"] = False
                             balls[this_ball]["player"] = None
 
@@ -241,7 +254,7 @@ def main():
                         for player in players:
                             # If the player was challenging someone previously, remove that previous opponnent and make an end statement
                             if players[player]["challenging-opponent"]:
-                                print(",".join([":" + player, ":challenges", ":" + players[player]["challenging-opponent"], "end", tmp_t_str]))
+                                print_results(player, "challeges", players[player]["challenging-opponent"], "end", tmp_t_str)
                                 players[players[player]["challenging-opponent"]]["challenging-opponent"] = None
                                 players[player]["challenging-opponent"] = None
 
@@ -249,15 +262,12 @@ def main():
                         # Second last player
                         for team in teams:
                             if teams[team]["second-last-player"] != None:
-                                print(",".join([":" + teams[team]["second-last-player"], ":isA", ":SecondLastPlayer", "end", tmp_t_str]))
+
+                                print_results(teams[team]["second-last-player"], "rdf:type", "SecondLastPlayer", "end", tmp_t_str)
+                                print_results(teams[team]["second-last-player"], "hasPosition", players[teams[team]["second-last-player"]]["position"], "end", tmp_t_str)
+
                                 teams[team]["second-last-player"] = None
 
-
-
-
-                        # if balls[this_ball]["player"]:
-                        #     players[balls[this_ball]["player"]]["ball-possession"] = False
-                        #     balls[this_ball]["player"] = None
                         continue
                     # Else, the ball was OUT, too, do nothing and continue
                     else:
@@ -296,7 +306,12 @@ def main():
                         # If the ball was controlled previously by a player, make the change and output an end output
                         if balls[this_ball]["player"]:
                             assert(players[balls[this_ball]["player"]]["ball-possession"])
-                            print(",".join([":" + balls[this_ball]["player"], ":touches", ":" + this_ball, "end", tmp_t_str]))
+
+                            print_results(balls[this_ball]["player"], "touches", this_ball, "end", tmp_t_str)
+                            print_results(balls[this_ball]["player"], "hasPosition", players[balls[this_ball]["player"]]["position"], "end", tmp_t_str)
+                            print_results(this_ball, "hasPosition", balls[this_ball]["position"], "end", tmp_t_str)
+                            print_results(balls[this_ball]["player"], "isInvolvedIn", "BallTouch", "end", tmp_t_str)
+
                             players[balls[this_ball]["player"]]["ball-possession"] = False
                             balls[this_ball]["player"] = None
                         # If the ball was NOT controlled previously by a player, do nothing
@@ -307,14 +322,29 @@ def main():
                         if not balls[this_ball]["player"]:
                             balls[this_ball]["player"] = nearest_player
                             players[nearest_player]["ball-possession"] = True
-                            print(",".join([":" + balls[this_ball]["player"], ":touches", ":" + this_ball, "begin", tmp_t_str]))
+
+                            print_results(balls[this_ball]["player"], "touches", this_ball, "begin", tmp_t_str)
+                            print_results(balls[this_ball]["player"], "hasPosition", players[balls[this_ball]["player"]]["position"], "begin", tmp_t_str)
+                            print_results(this_ball, "hasPosition", balls[this_ball]["position"], "begin", tmp_t_str)
+                            print_results(balls[this_ball]["player"], "isInvolvedIn", "BallTouch", "begin", tmp_t_str)
+
                         # Else, if the ball was controlled by someone different
                         elif balls[this_ball]["player"] != nearest_player:
-                            print(",".join([":" + balls[this_ball]["player"], ":touches", ":" + this_ball, "end", tmp_t_str]))
+
+                            print_results(balls[this_ball]["player"], "touches", this_ball, "end", tmp_t_str)
+                            print_results(balls[this_ball]["player"], "hasPosition", players[balls[this_ball]["player"]]["position"], "end", tmp_t_str)
+                            print_results(this_ball, "hasPosition", balls[this_ball]["position"], "end", tmp_t_str)
+                            print_results(balls[this_ball]["player"], "isInvolvedIn", "BallTouch", "end", tmp_t_str)
+
                             players[balls[this_ball]["player"]]["ball-possession"] = False
                             balls[this_ball]["player"] = nearest_player
                             players[nearest_player]["ball-possession"] = True
-                            print(",".join([":" + balls[this_ball]["player"], ":touches", ":" + this_ball, "begin", tmp_t_str]))
+
+                            print_results(balls[this_ball]["player"], "touches", this_ball, "begin", tmp_t_str)
+                            print_results(balls[this_ball]["player"], "hasPosition", players[balls[this_ball]["player"]]["position"], "begin", tmp_t_str)
+                            print_results(this_ball, "hasPosition", balls[this_ball]["position"], "begin", tmp_t_str)
+                            print_results(balls[this_ball]["player"], "isInvolvedIn", "BallTouch", "begin", tmp_t_str)
+
                         # Else, if the ball was controlled by same player, do nothing
                         elif balls[this_ball]["player"] == nearest_player:
                             pass
@@ -334,20 +364,62 @@ def main():
                 this_leg = SID_MAP[words[0]]["leg"]
                 this_team = SID_MAP[words[0]]["team"]
 
+                players[this_player]["position"] = "PlayerPosition" + words[1]
+                # print_results(this_player, "hasPosition", players[this_player]["position"], "begin", tmp_t_str)
+
                 # Update player location
                 players[this_player][this_leg] = tmp_location
                 players[this_player]["location"] = get_average(players[this_player]["left"], players[this_player]["right"])
 
+
+                ###############################################
                 # Identify second last player of his team
+                #
+
                 if game_status:
                     second_last_player = sorted([(k, v) for (k, v) in players.items() if v["team"] == this_team], key=lambda p: (p[1]["location"][1] - teams[this_team]["goal-line"]) * teams[this_team]["sign"])[1][0]
                     if teams[this_team]["second-last-player"] != second_last_player:
                         if teams[this_team]["second-last-player"] != None:
-                            print(",".join([":" + teams[this_team]["second-last-player"], ":isA", ":SecondLastPlayer", "end", tmp_t_str]))
+                            print_results(teams[this_team]["second-last-player"], "rdf:type", "SecondLastPlayer", "end", tmp_t_str)
+                            print_results(teams[this_team]["second-last-player"], "hasPosition", players[teams[this_team]["second-last-player"]]["position"], "end", tmp_t_str)
                         teams[this_team]["second-last-player"] = second_last_player
-                        print(",".join([":" + teams[this_team]["second-last-player"], ":isA", ":SecondLastPlayer", "begin", tmp_t_str]))
+
+                        print_results(teams[this_team]["second-last-player"], "rdf:type", "SecondLastPlayer", "begin", tmp_t_str)
+                        print_results(teams[this_team]["second-last-player"], "hasPosition", players[teams[this_team]["second-last-player"]]["position"], "begin", tmp_t_str)
+
                     else:
                         pass
+
+                ################################################
+                # Identify if the player is in offside position
+
+                if game_status:
+                    opponent = teams[this_team]["opponent"]
+                    distance_to_opponent_goal_line = (players[this_player]["location"][1] - teams[opponent]["goal-line"]) * teams[opponent]["sign"]
+                    second_last_opponent = teams[opponent]["second-last-player"]
+                    if second_last_opponent == None:
+                        continue
+                    distance_of_second_last_defender_to_opponent_goal_line = (players[second_last_opponent]["location"][1] - teams[opponent]["goal-line"]) * teams[opponent]["sign"]
+                    distance_of_ball_to_opponent_goal_line = ([(k, v) for (k, v) in balls.items() if v["ball-in"]][0][1]["location"][1] - teams[opponent]["goal-line"]) * teams[opponent]["sign"]
+
+                    if distance_to_opponent_goal_line < HALF_LENGTH and distance_to_opponent_goal_line < distance_of_second_last_defender_to_opponent_goal_line and distance_to_opponent_goal_line < distance_of_ball_to_opponent_goal_line:
+                        if not players[this_player]["in-offside-position"]:
+                            players[this_player]["in-offside-position"] = True
+                            print_results(this_player, "hasPosition", players[this_player]["position"], "begin", tmp_t_str)
+                            print_results(players[this_player]["position"], "isNearerToDefenderGoalLineThan", players[second_last_opponent]["position"], "begin", tmp_t_str)
+                            print_results(players[this_player]["position"], "isNearerToDefenderGoalLineThan", [(k, v) for (k, v) in balls.items() if v["ball-in"]][0][1]["position"], "begin", tmp_t_str)
+                        else:
+                            pass
+                    else:
+                        if players[this_player]["in-offside-position"]:
+                            players[this_player]["in-offside-position"] = False
+                            print_results(this_player, "hasPosition", players[this_player]["position"], "end", tmp_t_str)
+                            print_results(players[this_player]["position"], "isNearerToDefenderGoalLineThan", players[second_last_opponent]["position"], "end", tmp_t_str)
+                            print_results(players[this_player]["position"], "isNearerToDefenderGoalLineThan", [(k, v) for (k, v) in balls.items() if v["ball-in"]][0][1]["position"], "end", tmp_t_str)
+                        else:
+                            pass
+
+
 
                 ###############################################
                 # Check if player challenges an opponent
@@ -393,50 +465,8 @@ def main():
                         # If the player was not challenging someone previously, do nothing
 
 
-        # print(players)
-        # print(teams)
         print("Total computation time elapsed: " + str(time.time() - t) + " seconds")
 
 
 if __name__ == "__main__":
     main()
-
-
-#
-# :PlayerB3,is,SLD,start,0:37.1333
-# :PlayerB3,is,SLD,end,0:37.1349
-# :PlayerB6,is,SLD,start,0:37.1349
-#
-# <<<<<<<<<<<< Ball004 goes out of bounds at 0:38.5965
-#
-#
-# >>>>>>>>>>>>>> Ball004 goes into the field at 0:40.4828
-#
-# :PlayerA4,:touches,:Ball004,begin,0:40.4828
-#
-# <<<<<<<<<<<< Ball004 goes out of bounds at 0:42.492
-#
-# :PlayerA4,:touches,:Ball004,end,0:42.492
-# :PlayerB6,is,SLD,end,0:42.6277
-# :PlayerB1,is,SLD,start,0:42.6277
-#
-# >>>>>>>>>>>>>> Ball004 goes into the field at 0:44.3115
-#
-# :PlayerB6,:touches,:Ball004,begin,0:44.3115
-# :PlayerB6,:touches,:Ball004,end,0:44.964
-# :PlayerB1,is,SLD,end,0:45.5176
-# :PlayerB6,is,SLD,start,0:45.5176
-# :PlayerB5,:touches,:Ball004,begin,0:45.5809
-#
-# <<<<<<<<<<<< Ball004 goes out of bounds at 0:45.7795
-#
-# :PlayerB5,:touches,:Ball004,end,0:45.7795
-#
-# >>>>>>>>>>>>>> Ball004 goes into the field at 0:47.2578
-#
-# :PlayerB6,:touches,:Ball004,begin,0:47.9391
-# :PlayerB6,:touches,:Ball004,end,0:52.5794
-# :PlayerB6,is,SLD,end,0:52.8278
-# :PlayerB3,is,SLD,start,0:52.8278
-# :PlayerB5,:touches,:Ball004,begin,0:53.476
-# :PlayerB3,is,SLD,end,0:54.3392
