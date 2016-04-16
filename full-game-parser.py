@@ -8,7 +8,9 @@ from helpers import *
 #######################################
 # Ontology variables
 
-PREFIX = "http://tw.rpi.edu/web/Courses/Ontologies/2016/OE_6_Soccer_Offside/"
+PREFIX_SO = "http://tw.rpi.edu/web/Courses/Ontologies/2016/OE_6_Soccer_Offside/"
+PREFIX_LITERATE = "http://tw.rpi.edu/web/Courses/Ontologies/2016/Soccer_Offside_Literate/"
+PREFIX_COLON = ":"
 HAS_SENSOR = "<" + PREFIX + "hasSensor> "
 HAS_SAMPLING_TIME = "<" + PREFIX + "hasSamplingTime> "
 HAS_X = "<" + PREFIX + "hasX> "
@@ -25,50 +27,50 @@ NOT_NEEDED_IDS = REFEREE_IDS + GLOVE_IDS
 
 SID_MAP = {
     # Referee:
-    "105": {"type": "referee", "label": "Referee", "leg": "left"},
-    "106": {"type": "referee", "label": "Referee", "leg": "right"},
+    "105": {"type": "referee", "label": "referee", "leg": "left"},
+    "106": {"type": "referee", "label": "referee", "leg": "right"},
     # Balls:
     "4":  {"type": "ball", "label": "Ball004"},
     "8":  {"type": "ball", "label": "Ball008"},
     "10": {"type": "ball", "label": "Ball010"},
     # Team A:
-    "97": {"type": "keeper", "team": "A", "label": "PlayerA1", "name": "Nick Gertje", "arm": "left"},
-    "98": {"type": "keeper", "team": "A", "label": "PlayerA1", "name": "Nick Gertje", "arm": "right"},
-    "13": {"type": "player", "team": "A", "label": "PlayerA1", "name": "Nick Gertje", "leg": "left"},
-    "14": {"type": "player", "team": "A", "label": "PlayerA1", "name": "Nick Gertje", "leg": "right"},
-    "47": {"type": "player", "team": "A", "label": "PlayerA2", "name": "Dennis Dotterweich", "leg": "left"},
-    "16": {"type": "player", "team": "A", "label": "PlayerA2", "name": "Dennis Dotterweich", "leg": "right"},
-    "49": {"type": "player", "team": "A", "label": "PlayerA3", "name": "Niklas Waelzlein", "leg": "left"},
-    "88": {"type": "player", "team": "A", "label": "PlayerA3", "name": "Niklas Waelzlein", "leg": "right"},
-    "19": {"type": "player", "team": "A", "label": "PlayerA4", "name": "Wili Sommer", "leg": "left"},
-    "52": {"type": "player", "team": "A", "label": "PlayerA4", "name": "Wili Sommer", "leg": "right"},
-    "53": {"type": "player", "team": "A", "label": "PlayerA5", "name": "Philipp Harlass", "leg": "left"},
-    "54": {"type": "player", "team": "A", "label": "PlayerA5", "name": "Philipp Harlass", "leg": "right"},
-    "23": {"type": "player", "team": "A", "label": "PlayerA6", "name": "Roman Hartleb", "leg": "left"},
-    "24": {"type": "player", "team": "A", "label": "PlayerA6", "name": "Roman Hartleb", "leg": "right"},
-    "57": {"type": "player", "team": "A", "label": "PlayerA7", "name": "Erik Engelhardt", "leg": "left"},
-    "58": {"type": "player", "team": "A", "label": "PlayerA7", "name": "Erik Engelhardt", "leg": "right"},
-    "59": {"type": "player", "team": "A", "label": "PlayerA8", "name": "Sandro Schneider", "leg": "left"},
-    "28": {"type": "player", "team": "A", "label": "PlayerA8", "name": "Sandro Schneider", "leg": "right"},
+    "97": {"type": "glove", "team": "A", "label": "goalkeeperAleftglove", "name": "Nick Gertje", "arm": "left"},
+    "98": {"type": "glove", "team": "A", "label": "goalkeeperArightglove", "name": "Nick Gertje", "arm": "right"},
+    "13": {"type": "player", "team": "A", "label": "GoalkeeperA", "name": "Nick Gertje", "leg": "left"},
+    "14": {"type": "player", "team": "A", "label": "GoalkeeperA", "name": "Nick Gertje", "leg": "right"},
+    "47": {"type": "player", "team": "A", "label": "PlayerA1", "name": "Dennis Dotterweich", "leg": "left"},
+    "16": {"type": "player", "team": "A", "label": "PlayerA1", "name": "Dennis Dotterweich", "leg": "right"},
+    "49": {"type": "player", "team": "A", "label": "PlayerA2", "name": "Niklas Waelzlein", "leg": "left"},
+    "88": {"type": "player", "team": "A", "label": "PlayerA2", "name": "Niklas Waelzlein", "leg": "right"},
+    "19": {"type": "player", "team": "A", "label": "PlayerA3", "name": "Wili Sommer", "leg": "left"},
+    "52": {"type": "player", "team": "A", "label": "PlayerA3", "name": "Wili Sommer", "leg": "right"},
+    "53": {"type": "player", "team": "A", "label": "PlayerA4", "name": "Philipp Harlass", "leg": "left"},
+    "54": {"type": "player", "team": "A", "label": "PlayerA4", "name": "Philipp Harlass", "leg": "right"},
+    "23": {"type": "player", "team": "A", "label": "PlayerA5", "name": "Roman Hartleb", "leg": "left"},
+    "24": {"type": "player", "team": "A", "label": "PlayerA5", "name": "Roman Hartleb", "leg": "right"},
+    "57": {"type": "player", "team": "A", "label": "PlayerA6", "name": "Erik Engelhardt", "leg": "left"},
+    "58": {"type": "player", "team": "A", "label": "PlayerA6", "name": "Erik Engelhardt", "leg": "right"},
+    "59": {"type": "player", "team": "A", "label": "PlayerA7", "name": "Sandro Schneider", "leg": "left"},
+    "28": {"type": "player", "team": "A", "label": "PlayerA7", "name": "Sandro Schneider", "leg": "right"},
     # Team B:
-    "99": {"type": "keeper", "team": "B", "label": "PlayerB1", "name": "Leon Krapf", "arm": "left"},
-    "100": {"type": "keeper", "team": "B", "label": "PlayerB1", "name": "Leon Krapf", "arm": "right"},
-    "61": {"type": "player", "team": "B", "label": "PlayerB1", "name": "Leon Krapf", "leg": "left"},
-    "62": {"type": "player", "team": "B", "label": "PlayerB1", "name": "Leon Krapf", "leg": "right"},
-    "63": {"type": "player", "team": "B", "label": "PlayerB2", "name": "Kevin Baer", "leg": "left"},
-    "64": {"type": "player", "team": "B", "label": "PlayerB2", "name": "Kevin Baer", "leg": "right"},
-    "65": {"type": "player", "team": "B", "label": "PlayerB3", "name": "Luca Ziegler", "leg": "left"},
-    "66": {"type": "player", "team": "B", "label": "PlayerB3", "name": "Luca Ziegler", "leg": "right"},
-    "67": {"type": "player", "team": "B", "label": "PlayerB4", "name": "Ben Mueller", "leg": "left"},
-    "68": {"type": "player", "team": "B", "label": "PlayerB4", "name": "Ben Mueller", "leg": "right"},
-    "69": {"type": "player", "team": "B", "label": "PlayerB5", "name": "Vale Reitstetter", "leg": "left"},
-    "38": {"type": "player", "team": "B", "label": "PlayerB5", "name": "Vale Reitstetter", "leg": "right"},
-    "71": {"type": "player", "team": "B", "label": "PlayerB6", "name": "Christopher Lee", "leg": "left"},
-    "40": {"type": "player", "team": "B", "label": "PlayerB6", "name": "Christopher Lee", "leg": "right"},
-    "73": {"type": "player", "team": "B", "label": "PlayerB7", "name": "Leon Heinze", "leg": "left"},
-    "74": {"type": "player", "team": "B", "label": "PlayerB7", "name": "Leon Heinze", "leg": "right"},
-    "75": {"type": "player", "team": "B", "label": "PlayerB8", "name": "Leo Langhans", "leg": "left"},
-    "44": {"type": "player", "team": "B", "label": "PlayerB8", "name": "Leo Langhans", "leg": "right"}
+    "99": {"type": "glove", "team": "B", "label": "goalkeeperBleftglove", "name": "Leon Krapf", "arm": "left"},
+    "100": {"type": "glove", "team": "B", "label": "goalkeeperBleftglove", "name": "Leon Krapf", "arm": "right"},
+    "61": {"type": "player", "team": "B", "label": "GoalkeeperB", "name": "Leon Krapf", "leg": "left"},
+    "62": {"type": "player", "team": "B", "label": "GoalkeeperB", "name": "Leon Krapf", "leg": "right"},
+    "63": {"type": "player", "team": "B", "label": "GoalkeeperB", "name": "Kevin Baer", "leg": "left"},
+    "64": {"type": "player", "team": "B", "label": "PlayerB1", "name": "Kevin Baer", "leg": "right"},
+    "65": {"type": "player", "team": "B", "label": "PlayerB2", "name": "Luca Ziegler", "leg": "left"},
+    "66": {"type": "player", "team": "B", "label": "PlayerB2", "name": "Luca Ziegler", "leg": "right"},
+    "67": {"type": "player", "team": "B", "label": "PlayerB3", "name": "Ben Mueller", "leg": "left"},
+    "68": {"type": "player", "team": "B", "label": "PlayerB3", "name": "Ben Mueller", "leg": "right"},
+    "69": {"type": "player", "team": "B", "label": "PlayerB4", "name": "Vale Reitstetter", "leg": "left"},
+    "38": {"type": "player", "team": "B", "label": "PlayerB4", "name": "Vale Reitstetter", "leg": "right"},
+    "71": {"type": "player", "team": "B", "label": "PlayerB5", "name": "Christopher Lee", "leg": "left"},
+    "40": {"type": "player", "team": "B", "label": "PlayerB5", "name": "Christopher Lee", "leg": "right"},
+    "73": {"type": "player", "team": "B", "label": "PlayerB6", "name": "Leon Heinze", "leg": "left"},
+    "74": {"type": "player", "team": "B", "label": "PlayerB6", "name": "Leon Heinze", "leg": "right"},
+    "75": {"type": "player", "team": "B", "label": "PlayerB7", "name": "Leo Langhans", "leg": "left"},
+    "44": {"type": "player", "team": "B", "label": "PlayerB7", "name": "Leo Langhans", "leg": "right"}
 }
 
 #######################################
@@ -155,8 +157,10 @@ def main():
         balls = {}
         players = {}
         teams = {}
+        referees = {}
+        gloves = {}
 
-        # Setting up players and balls
+        # Setting up players, balls and referees
         for sid in SID_MAP:
             if SID_MAP[sid]["type"] is "ball":
                 balls[SID_MAP[sid]["label"]] = {
@@ -179,6 +183,22 @@ def main():
                     "position": None,
                     "in-offside-position": False
                 }
+            elif SID_MAP[sid]["type"] is "referee":
+                referees[SID_MAP[sid]["label"]] = {
+                    "label": "referee",
+                    "location": (0, 0, 0),
+                    "left": (0, 0, 0),
+                    "right": (0, 0, 0),
+                    "position": None
+                }
+            elif SID_MAP[sid]["type"] is "glove":
+                gloves[SID_MAP[sid]["label"]] = {
+                    "label": SID_MAP[sid]["label"],
+                    "team": SID_MAP[sid]["team"],
+                    "location": (0, 0, 0),
+                    "position": None
+                }
+
         # Setting up teams
         teams = {
             "A": {"label": "TeamA", "opponent": "B", "is-attacking": None, "second-last-player": None, "goal-line": Y_MIN, "sign": +1},
@@ -194,17 +214,20 @@ def main():
 
             words = line.strip().split(",")[0:5]
 
-            # Discard irrelevant sensor data
-            if words[0] in NOT_NEEDED_IDS:
-                continue
+            # # Discard irrelevant sensor data
+            # if words[0] in NOT_NEEDED_IDS:
+            #     continue
 
             # Format time from picosends into MM:SS
-            tmp_t = (int(words[1]) - INITIAL_TIME) * 1e-12 - APPROXIMATE_START_TIME
+            tmp_ts = int(words[1]) - INITIAL_TIME
+            tmp_ts_str = str(tmp_ts)
+
+            tmp_t = tmp_ts * 1e-12 - APPROXIMATE_START_TIME
             tmp_t_str = display_seconds_as_minutes(tmp_t)
             if tmp_t < 0:
                 print(words[1])
                 continue
-            if tmp_t > 180:
+            if tmp_t > 450:
                 break
             if tmp_t > 1809:
                 break
@@ -463,6 +486,29 @@ def main():
                             players[players[this_player]["challenging-opponent"]]["challenging-opponent"] = None
                             players[this_player]["challenging-opponent"] = None
                         # If the player was not challenging someone previously, do nothing
+
+
+            elif tmp_type == "referee":
+                # Update referee location and print
+                # this_referee = SID_MAP[words[0]]["label"]
+                # this_leg = SID_MAP[words[0]]["leg"]
+                # referees[this_referee][this_leg] = tmp_location
+                # referees[this_referee]["location"] = get_average(referees[this_referee]["left"], referees[this_referee]["right"])
+                # referees[this_referee]["position"] = this_referee + "position" + tmp_ts_str
+                # print_results_new(PREFIX_SO + this_referee, PREFIX_SO + "hasPosition", PREFIX_SO + referees[this_referee]["position"], "begin", tmp_ts_str, tmp_t_str)
+
+
+            elif tmp_type == "glove":
+                # Update glove position and print
+                # this_glove = SID_MAP[words[0]]["label"]
+                # gloves[this_glove]["location"] = tmp_location
+                # gloves[this_glove]["position"] = this_glove + "position" + tmp_ts_str
+                # print_results_new(this_glove, "hasPosition", gloves[this_glove]["position"], "begin", tmp_ts_str, tmp_t_str)
+                # print_results_new(PREFIX_SO + gloves[this_glove]["position"], "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", PREFIX_LITERATE + "GlovePosition", "begin", tmp_ts_str, tmp_t_str)
+
+
+            else:
+                exit(tmp_type)
 
 
         print("Total computation time elapsed: " + str(time.time() - t) + " seconds")
