@@ -16,5 +16,5 @@ def print_results(s, p, o, b, t):
     print(",".join([PREFIX + s, PREFIX + p, PREFIX + o, b, t]))
 
 
-def print_results_new(s, p, o, b, ts, t):
-    print(",".join([s, p, o, b, ts, t]))
+def print_results_new(s, p, o, b, ts):
+    print(",".join([s, p, o, b, ts]))
