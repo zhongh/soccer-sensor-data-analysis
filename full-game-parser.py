@@ -97,6 +97,7 @@ X_MIN = 0
 X_MAX = 52483
 Y_MIN = -33960
 Y_MAX = 33965
+HALF_LINE = 0
 HALF_LENGTH = (Y_MAX - Y_MIN) / 2
 
 # Team B is the red team and team A is the yellow team
@@ -204,8 +205,8 @@ def main():
 
         # Setting up teams
         teams = {
-            "A": {"label": "TeamA", "opponent": "B", "is-attacking": None, "second-last-player": None, "goal-line": Y_MIN, "sign": +1},
-            "B": {"label": "TeamB", "opponent": "A", "is-attacking": None, "second-last-player": None, "goal-line": Y_MAX, "sign": -1}
+            "A": {"label": "TeamA", "opponent": "B", "is-attacking": None, "second-last-player": None, "goal-line": Y_MIN, "sign": +1, "own-half-min": Y_MIN, "own-half-max": HALF_LINE},
+            "B": {"label": "TeamB", "opponent": "A", "is-attacking": None, "second-last-player": None, "goal-line": Y_MAX, "sign": -1, "own-half-min": HALF_LINE, "own-half-max": Y_MAX}
         }
 
 
@@ -230,7 +231,7 @@ def main():
             if tmp_t < 0:
                 print(words[1])
                 continue
-            if tmp_t > 2:
+            if tmp_t > 34:
                 break
             if tmp_t > 1809:
                 break
@@ -326,7 +327,6 @@ def main():
                     # Else, the ball was IN, do nothing
 
 
-
                     ###############################################
                     # Identify ball-player interference:
                     #
@@ -416,6 +416,15 @@ def main():
                 # Update player location
                 players[this_player][this_leg] = tmp_location
                 players[this_player]["location"] = get_average(players[this_player]["left"], players[this_player]["right"])
+
+                ###############################################
+                # Annotate player in own half
+                # if players[this_player]["location"][1] > teams[this_team]["own-half-min"] and players[this_player]["location"][1] < teams[this_team]["own-half-max"]:
+                #     print_results_new(PREFIX_SO + players[this_player]["position"], RDFS_TYPE, PREFIX_LITERATE + "OwnHalfPosition", "begin", tmp_ts_str, tmp_t_str)
+                #     print_results_new(PREFIX_SO + this_player, RDFS_TYPE, PREFIX_SO + "PlayerInOwnHalf", "begin", tmp_ts_str, tmp_t_str)
+                # else:
+                #     print_results_new(PREFIX_SO + this_player, RDFS_TYPE, PREFIX_SO + "PlayerNotInOwnHalf", "begin", tmp_ts_str, tmp_t_str)
+                ###############################################
 
 
                 ###############################################
