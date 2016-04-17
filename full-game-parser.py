@@ -404,8 +404,14 @@ def main():
                 this_leg = SID_MAP[words[0]]["leg"]
                 this_team = SID_MAP[words[0]]["team"]
 
-                players[this_player]["position"] = "PlayerPosition" + words[1]
-                # print_results(this_player, "hasPosition", players[this_player]["position"], "begin", tmp_t_str)
+                players[this_player]["position"] = this_player + "Position" + words[1]
+
+                ###############################################
+                # Print player hasPosition triple
+                # print_results_new(PREFIX_SO + this_player, PREFIX_SO + "hasPosition", PREFIX_SO + players[this_player]["position"], "begin", tmp_ts_str, tmp_t_str)
+                # if not game_status:
+                #     print_results_new(PREFIX_SO + players[this_player]["position"], RDFS_TYPE, PREFIX_LITERATE + "OffsideIrreleventPosition", "begin", tmp_ts_str, tmp_t_str)
+                ###############################################
 
                 # Update player location
                 players[this_player][this_leg] = tmp_location
@@ -513,9 +519,10 @@ def main():
                 referees[this_referee][this_leg] = tmp_location
                 referees[this_referee]["location"] = get_average(referees[this_referee]["left"], referees[this_referee]["right"])
                 referees[this_referee]["position"] = this_referee + "position" + tmp_ts_str
+                ###############################################
                 # and print
                 # print_results_new(PREFIX_SO + this_referee, PREFIX_SO + "hasPosition", PREFIX_SO + referees[this_referee]["position"], "begin", tmp_ts_str, tmp_t_str)
-
+                ###############################################
 
 
             elif tmp_type == "glove":
@@ -523,10 +530,11 @@ def main():
                 this_glove = SID_MAP[words[0]]["label"]
                 gloves[this_glove]["location"] = tmp_location
                 gloves[this_glove]["position"] = this_glove + "position" + tmp_ts_str
+                ###############################################
                 # and print
                 # print_results_new(PREFIX_SO + this_glove, PREFIX_SO + "hasPosition", PREFIX_SO + gloves[this_glove]["position"], "begin", tmp_ts_str, tmp_t_str)
                 # print_results_new(PREFIX_SO + gloves[this_glove]["position"], "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", PREFIX_LITERATE + "GlovePosition", "begin", tmp_ts_str, tmp_t_str)
-
+                ###############################################
 
             else:
                 exit(tmp_type)
