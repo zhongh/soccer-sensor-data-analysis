@@ -230,9 +230,9 @@ def main():
             if tmp_t < 0:
                 print(words[1])
                 continue
+
+            # Modify here for termination time
             if tmp_t > 300:
-                break
-            if tmp_t > 1809:
                 break
 
             # Type int for coordinates
