@@ -231,7 +231,7 @@ def main():
             if tmp_t < 0:
                 print(words[1])
                 continue
-            if tmp_t > 34:
+            if tmp_t > 3:
                 break
             if tmp_t > 1809:
                 break
@@ -407,7 +407,8 @@ def main():
                 players[this_player]["position"] = this_player + "Position" + words[1]
 
                 ###############################################
-                # Print player hasPosition triple
+                # annotate player hasPosition triple
+                #
                 # print_results_new(PREFIX_SO + this_player, PREFIX_SO + "hasPosition", PREFIX_SO + players[this_player]["position"], "begin", tmp_ts_str, tmp_t_str)
                 # if not game_status:
                 #     print_results_new(PREFIX_SO + players[this_player]["position"], RDFS_TYPE, PREFIX_LITERATE + "OffsideIrreleventPosition", "begin", tmp_ts_str, tmp_t_str)
@@ -419,31 +420,32 @@ def main():
 
                 ###############################################
                 # Annotate player in own half
+                #
                 # if players[this_player]["location"][1] > teams[this_team]["own-half-min"] and players[this_player]["location"][1] < teams[this_team]["own-half-max"]:
-                #     print_results_new(PREFIX_SO + players[this_player]["position"], RDFS_TYPE, PREFIX_LITERATE + "OwnHalfPosition", "begin", tmp_ts_str, tmp_t_str)
                 #     print_results_new(PREFIX_SO + this_player, RDFS_TYPE, PREFIX_SO + "PlayerInOwnHalf", "begin", tmp_ts_str, tmp_t_str)
                 # else:
                 #     print_results_new(PREFIX_SO + this_player, RDFS_TYPE, PREFIX_SO + "PlayerNotInOwnHalf", "begin", tmp_ts_str, tmp_t_str)
                 ###############################################
 
 
+                # Compute second last player of the team
+                second_last_player = sorted([(k, v) for (k, v) in players.items() if v["team"] == this_team], key=lambda p: (p[1]["location"][1] - teams[this_team]["goal-line"]) * teams[this_team]["sign"])[1][0]
+                if teams[this_team]["second-last-player"] != second_last_player:
+                    teams[this_team]["second-last-player"] = second_last_player
+
+
                 ###############################################
-                # Identify second last player of his team
+                # Annotate second last player of his team, regardless ball in or out (if game_status:)
                 #
+                # for teammate in [(k, v) for (k, v) in players.items() if v["team"] == this_team]:
+                #     if teammate[0] == second_last_player:
+                #         print_results_new(PREFIX_SO + teammate[0], RDFS_TYPE, PREFIX_SO + "SecondLastPlayer", "begin", tmp_ts_str,  tmp_t_str)
+                #     else:
+                #         print_results_new(PREFIX_SO + teammate[0], RDFS_TYPE, PREFIX_SO + "NotSecondLastPlayer", "begin", tmp_ts_str,  tmp_t_str)
+                ###############################################
 
-                if game_status:
-                    second_last_player = sorted([(k, v) for (k, v) in players.items() if v["team"] == this_team], key=lambda p: (p[1]["location"][1] - teams[this_team]["goal-line"]) * teams[this_team]["sign"])[1][0]
-                    if teams[this_team]["second-last-player"] != second_last_player:
-                        if teams[this_team]["second-last-player"] != None:
-                            print_results(teams[this_team]["second-last-player"], "rdf:type", "SecondLastPlayer", "end", tmp_t_str)
-                            print_results(teams[this_team]["second-last-player"], "hasPosition", players[teams[this_team]["second-last-player"]]["position"], "end", tmp_t_str)
-                        teams[this_team]["second-last-player"] = second_last_player
 
-                        print_results(teams[this_team]["second-last-player"], "rdf:type", "SecondLastPlayer", "begin", tmp_t_str)
-                        print_results(teams[this_team]["second-last-player"], "hasPosition", players[teams[this_team]["second-last-player"]]["position"], "begin", tmp_t_str)
-
-                    else:
-                        pass
+                ###############################################
 
                 ################################################
                 # Identify if the player is in offside position
