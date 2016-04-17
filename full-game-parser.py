@@ -341,56 +341,21 @@ def main():
                     nearest_distance = players_sorted[0][1]["distance-to-ball"]
 
 
-                    # If the nearest player has >= 2000mm to the ball then nobody has the ball
+                    # If the nearest player has >= 1000mm to the ball then nobody has the ball
                     if nearest_distance >= BALL_CONTROL_DISTANCE:
-                        # If the ball was controlled previously by a player, make the change and output an end output
-                        if balls[this_ball]["player"]:
-                            assert(players[balls[this_ball]["player"]]["ball-possession"])
+                        balls[this_ball]["player"] = None
 
-                            print_results(balls[this_ball]["player"], "touches", this_ball, "end", tmp_t_str)
-                            print_results(balls[this_ball]["player"], "hasPosition", players[balls[this_ball]["player"]]["position"], "end", tmp_t_str)
-                            ###### print_results(this_ball, "hasPosition", balls[this_ball]["position"], "end", tmp_t_str)
-                            print_results(balls[this_ball]["player"], "isInvolvedIn", "BallTouch", "end", tmp_t_str)
-
-                            players[balls[this_ball]["player"]]["ball-possession"] = False
-                            balls[this_ball]["player"] = None
-                        # If the ball was NOT controlled previously by a player, do nothing
-
-                    # If the nearest player has < 2000mm to the ball then he has the ball
+                    # If the nearest player has < 1000mm to the ball then he has the ball
                     if nearest_distance < BALL_CONTROL_DISTANCE:
-                        # If the ball was controlled by no one
-                        if not balls[this_ball]["player"]:
-                            balls[this_ball]["player"] = nearest_player
-                            players[nearest_player]["ball-possession"] = True
+                        balls[this_ball]["player"] = nearest_player
+                        players[nearest_player]["ball-possession"] = True
 
-                            print_results(balls[this_ball]["player"], "touches", this_ball, "begin", tmp_t_str)
-                            print_results(balls[this_ball]["player"], "hasPosition", players[balls[this_ball]["player"]]["position"], "begin", tmp_t_str)
-                            ##### print_results(this_ball, "hasPosition", balls[this_ball]["position"], "begin", tmp_t_str)
-                            print_results(balls[this_ball]["player"], "isInvolvedIn", "BallTouch", "begin", tmp_t_str)
-
-                        # Else, if the ball was controlled by someone different
-                        elif balls[this_ball]["player"] != nearest_player:
-
-                            print_results(balls[this_ball]["player"], "touches", this_ball, "end", tmp_t_str)
-                            print_results(balls[this_ball]["player"], "hasPosition", players[balls[this_ball]["player"]]["position"], "end", tmp_t_str)
-                            ##### print_results(this_ball, "hasPosition", balls[this_ball]["position"], "end", tmp_t_str)
-                            print_results(balls[this_ball]["player"], "isInvolvedIn", "BallTouch", "end", tmp_t_str)
-
-                            players[balls[this_ball]["player"]]["ball-possession"] = False
-                            balls[this_ball]["player"] = nearest_player
-                            players[nearest_player]["ball-possession"] = True
-
-                            print_results(balls[this_ball]["player"], "touches", this_ball, "begin", tmp_t_str)
-                            print_results(balls[this_ball]["player"], "hasPosition", players[balls[this_ball]["player"]]["position"], "begin", tmp_t_str)
-                            ##### print_results(this_ball, "hasPosition", balls[this_ball]["position"], "begin", tmp_t_str)
-                            print_results(balls[this_ball]["player"], "isInvolvedIn", "BallTouch", "begin", tmp_t_str)
-
-                        # Else, if the ball was controlled by same player, do nothing
-                        elif balls[this_ball]["player"] == nearest_player:
-                            pass
-                    #
-                    #
-                    ###############################################
+                        ###############################################
+                        # Annotate ball touch
+                        #
+                        print_results_new(PREFIX_SO + balls[this_ball]["player"], PREFIX_SO + "isInvolvedIn", PREFIX_SO + "BallTouch", "begin", tmp_ts_str, tmp_t_str)
+                        print_results_new(PREFIX_SO + balls[this_ball]["player"], PREFIX_SO + "touches", PREFIX_SO + this_ball, "begin", tmp_ts_str, tmp_t_str)
+                        ###############################################
 
 
             # When player data comes in:
