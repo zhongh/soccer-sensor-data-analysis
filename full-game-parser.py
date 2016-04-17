@@ -82,7 +82,7 @@ SID_MAP = {
 INITIAL_TIME = 10629342490369879
 APPROXIMATE_START_TIME = 119
 
-BALL_CONTROL_DISTANCE = 2000
+BALL_CONTROL_DISTANCE = 750
 
 # Suggested coordinates for the field of play: (0,33965), (0,-33960),(52483,33965),(52483,-33960)
 #
@@ -231,7 +231,7 @@ def main():
             if tmp_t < 0:
                 print(words[1])
                 continue
-            if tmp_t > 3:
+            if tmp_t > 60:
                 break
             if tmp_t > 1809:
                 break
@@ -262,6 +262,9 @@ def main():
                     # print_results_new(PREFIX_SO + this_ball, RDFS_TYPE, PREFIX_SO + "BackupBall", "begin", tmp_ts_str, tmp_t_str)
                     #########################################
 
+                    # Update the ball location
+                    balls[this_ball]["location"] = tmp_location
+
                     # If the ball was IN
                     if balls[this_ball]["ball-in"]:
                         # Update ball status
@@ -271,37 +274,12 @@ def main():
                         # Also set corresponding player and ball status to False or None, and print out end statements!!! ball-player, player-player, and offsides
 
                         # Ball-Player:
-                        # If the ball was controlled previously by a player, make the change and output an end statement
+                        # If the ball was controlled previously by a player, make the change
                         if balls[this_ball]["player"]:
                             assert(players[balls[this_ball]["player"]]["ball-possession"])
-
-                            print_results(balls[this_ball]["player"], "touches", this_ball, "end", tmp_t_str)
-                            print_results(balls[this_ball]["player"], "hasPosition", players[balls[this_ball]["player"]]["position"], "end", tmp_t_str)
-                            ###print_results(this_ball, "hasPosition", balls[this_ball]["position"], "end", tmp_t_str)
-                            print_results(balls[this_ball]["player"], "isInvolvedIn", "BallTouch", "end", tmp_t_str)
-
                             players[balls[this_ball]["player"]]["ball-possession"] = False
                             balls[this_ball]["player"] = None
 
-                        # Player-player
-                        for player in players:
-                            # If the player was challenging someone previously, remove that previous opponnent and make an end statement
-                            if players[player]["challenging-opponent"]:
-                                print_results(player, "challeges", players[player]["challenging-opponent"], "end", tmp_t_str)
-                                players[players[player]["challenging-opponent"]]["challenging-opponent"] = None
-                                players[player]["challenging-opponent"] = None
-
-
-                        # Second last player
-                        for team in teams:
-                            if teams[team]["second-last-player"] != None:
-
-                                print_results(teams[team]["second-last-player"], "rdf:type", "SecondLastPlayer", "end", tmp_t_str)
-                                print_results(teams[team]["second-last-player"], "hasPosition", players[teams[team]["second-last-player"]]["position"], "end", tmp_t_str)
-
-                                teams[team]["second-last-player"] = None
-
-                        continue
                     # Else, the ball was OUT, too, do nothing and continue
                     else:
                         continue
@@ -327,9 +305,7 @@ def main():
                     # Else, the ball was IN, do nothing
 
 
-                    ###############################################
                     # Identify ball-player interference:
-                    #
 
                     # Update each players distance to ball:
                     for p in players:
@@ -353,8 +329,8 @@ def main():
                         ###############################################
                         # Annotate ball touch
                         #
-                        print_results_new(PREFIX_SO + balls[this_ball]["player"], PREFIX_SO + "isInvolvedIn", PREFIX_SO + "BallTouch", "begin", tmp_ts_str, tmp_t_str)
-                        print_results_new(PREFIX_SO + balls[this_ball]["player"], PREFIX_SO + "touches", PREFIX_SO + this_ball, "begin", tmp_ts_str, tmp_t_str)
+                        # print_results_new(PREFIX_SO + balls[this_ball]["player"], PREFIX_SO + "isInvolvedIn", PREFIX_SO + "BallTouch", "begin", tmp_ts_str, tmp_t_str)
+                        # print_results_new(PREFIX_SO + balls[this_ball]["player"], PREFIX_SO + "touches", PREFIX_SO + this_ball, "begin", tmp_ts_str, tmp_t_str)
                         ###############################################
 
 
@@ -443,48 +419,40 @@ def main():
 
 
 
-                ###############################################
-                # Check if player challenges an opponent
-                #
+                # Compute if player challenges an opponent
 
                 # A player must not challenge an opponent when the game is off or when he has ball possession:
                 if game_status and (not players[this_player]["ball-possession"]):
 
-                    # Find the opponent that is the closest to the player
+                    # Compute the opponent that is the closest to the player
                     nearest_opponent = None
                     nearest_distance = 888888
-                    distance = 888888
                     for p in {k:v for (k,v) in players.items() if v["team"] != this_team}:
-                        # if players[p]["team"] != players[this_player]["team"]:
                         distance = get_distance(players[p]["location"], players[this_player]["location"])
                         if distance < nearest_distance:
                             nearest_distance = distance
                             nearest_opponent = p
 
                     # If the distance is close, then they are challengeing
-                    if nearest_distance < 750:
-                        # If this player is not challenging previously, then add them
-                        if not players[this_player]["challenging-opponent"]:
-                            players[this_player]["challenging-opponent"] = nearest_opponent
-                            players[nearest_opponent]["challenging-opponent"] = this_player
-                            print(",".join([":" + this_player, ":challenges", ":" + nearest_opponent, "start", tmp_t_str]))
-                        # Else, if this player is challenging a different player previously, we switch
-                        elif players[this_player]["challenging-opponent"] != nearest_opponent:
-                            print(",".join([":" + this_player, ":challenges", ":" + players[this_player]["challenging-opponent"], "end", tmp_t_str]))
-                            players[this_player]["challenging-opponent"] = nearest_opponent
-                            players[nearest_opponent]["challenging-opponent"] = this_player
-                            print(",".join([":" + this_player, ":challenges", ":" + nearest_opponent, "start", tmp_t_str]))
-                        # Else, if this player is challenging the same player, do nothing
-                        else:
-                            pass
+                    if nearest_distance < 1500:
+                        print(nearest_distance)
+                        players[this_player]["challenging-opponent"] = nearest_opponent
+                        players[nearest_opponent]["challenging-opponent"] = this_player
+
+                        ###############################################
+                        # Annotate player challenge
+                        #
+                        # print_results_new(PREFIX_SO + this_player, PREFIX_SO + "isInvolvedIn", PREFIX_SO + "OpponentChallenge", "begin", tmp_ts_str, tmp_t_str)
+                        # print_results_new(PREFIX_SO + nearest_opponent, PREFIX_SO + "isInvolvedIn", PREFIX_SO + "OpponentChallenge", "begin", tmp_ts_str, tmp_t_str)
+                        ###############################################
+
                     # Else, the distance is not close enough:
                     else:
                         # If the player was challenging someone previously, remove that previous opponnent
                         if players[this_player]["challenging-opponent"]:
-                            print(",".join([":" + this_player, ":challenges", ":" + players[this_player]["challenging-opponent"], "end", tmp_t_str]))
                             players[players[this_player]["challenging-opponent"]]["challenging-opponent"] = None
                             players[this_player]["challenging-opponent"] = None
-                        # If the player was not challenging someone previously, do nothing
+
 
 
 
