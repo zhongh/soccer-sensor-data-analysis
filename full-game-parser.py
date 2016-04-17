@@ -8,9 +8,11 @@ from helpers import *
 #######################################
 # Ontology variables
 
-PREFIX_SO = "http://tw.rpi.edu/web/Courses/Ontologies/2016/OE_6_Soccer_Offside/"
-PREFIX_LITERATE = "http://tw.rpi.edu/web/Courses/Ontologies/2016/Soccer_Offside_Literate/"
+PREFIX_SO = "SO:"
+PREFIX_LITERATE = "SOL:"
 PREFIX_COLON = ":"
+RDFS_TYPE = "rdfs:type"
+
 HAS_SENSOR = "<" + PREFIX + "hasSensor> "
 HAS_SAMPLING_TIME = "<" + PREFIX + "hasSamplingTime> "
 HAS_X = "<" + PREFIX + "hasX> "
@@ -30,9 +32,10 @@ SID_MAP = {
     "105": {"type": "referee", "label": "referee", "leg": "left"},
     "106": {"type": "referee", "label": "referee", "leg": "right"},
     # Balls:
-    "4":  {"type": "ball", "label": "Ball004"},
-    "8":  {"type": "ball", "label": "Ball008"},
-    "10": {"type": "ball", "label": "Ball010"},
+    "4":  {"type": "ball", "label": "ball4"},
+    "8":  {"type": "ball", "label": "ball8"},
+    "10": {"type": "ball", "label": "ball10"},
+    "12": {"type": "ball", "label": "ball12"},
     # Team A:
     "97": {"type": "glove", "team": "A", "label": "goalkeeperAleftglove", "name": "Nick Gertje", "arm": "left"},
     "98": {"type": "glove", "team": "A", "label": "goalkeeperArightglove", "name": "Nick Gertje", "arm": "right"},
@@ -54,7 +57,7 @@ SID_MAP = {
     "28": {"type": "player", "team": "A", "label": "PlayerA7", "name": "Sandro Schneider", "leg": "right"},
     # Team B:
     "99": {"type": "glove", "team": "B", "label": "goalkeeperBleftglove", "name": "Leon Krapf", "arm": "left"},
-    "100": {"type": "glove", "team": "B", "label": "goalkeeperBleftglove", "name": "Leon Krapf", "arm": "right"},
+    "100": {"type": "glove", "team": "B", "label": "goalkeeperBrightglove", "name": "Leon Krapf", "arm": "right"},
     "61": {"type": "player", "team": "B", "label": "GoalkeeperB", "name": "Leon Krapf", "leg": "left"},
     "62": {"type": "player", "team": "B", "label": "GoalkeeperB", "name": "Leon Krapf", "leg": "right"},
     "63": {"type": "player", "team": "B", "label": "GoalkeeperB", "name": "Kevin Baer", "leg": "left"},
@@ -227,7 +230,7 @@ def main():
             if tmp_t < 0:
                 print(words[1])
                 continue
-            if tmp_t > 450:
+            if tmp_t > 2:
                 break
             if tmp_t > 1809:
                 break
@@ -243,14 +246,20 @@ def main():
 
                 this_ball = SID_MAP[words[0]]["label"]
 
-                balls[this_ball]["position"] = "BallPosition" + words[1]
-                # print_results(this_ball, "hasPosition", balls[this_ball]["position"], "begin", tmp_t_str)
+                balls[this_ball]["position"] = this_ball + "position" + tmp_ts_str
+                #### print_results(this_ball, "hasPosition", balls[this_ball]["position"], "begin", tmp_t_str)
 
 
                 # If the ball is OUT
                 if is_out(tmp_location):
 
                     game_status = False
+
+                    #########################################
+                    # Print ball position output
+                    # print_results_new(PREFIX_SO + this_ball, PREFIX_SO + "hasPosition", PREFIX_SO + balls[this_ball]["position"], "begin", tmp_ts_str, tmp_t_str)
+                    # print_results_new(PREFIX_SO + this_ball, RDFS_TYPE, PREFIX_SO + "BackupBall", "begin", tmp_ts_str, tmp_t_str)
+                    #########################################
 
                     # If the ball was IN
                     if balls[this_ball]["ball-in"]:
@@ -267,7 +276,7 @@ def main():
 
                             print_results(balls[this_ball]["player"], "touches", this_ball, "end", tmp_t_str)
                             print_results(balls[this_ball]["player"], "hasPosition", players[balls[this_ball]["player"]]["position"], "end", tmp_t_str)
-                            print_results(this_ball, "hasPosition", balls[this_ball]["position"], "end", tmp_t_str)
+                            ###print_results(this_ball, "hasPosition", balls[this_ball]["position"], "end", tmp_t_str)
                             print_results(balls[this_ball]["player"], "isInvolvedIn", "BallTouch", "end", tmp_t_str)
 
                             players[balls[this_ball]["player"]]["ball-possession"] = False
@@ -301,6 +310,12 @@ def main():
 
                     game_status = True
 
+                    #########################################
+                    # Print ball position output
+                    # print_results_new(PREFIX_SO + this_ball, PREFIX_SO + "hasPosition", PREFIX_SO + balls[this_ball]["position"], "begin", tmp_ts_str, tmp_t_str)
+                    # print_results_new(PREFIX_SO + this_ball, RDFS_TYPE, PREFIX_SO + "InFieldBall", "begin", tmp_ts_str, tmp_t_str)
+                    #########################################
+
                     # Update the ball location
                     balls[this_ball]["location"] = tmp_location
 
@@ -309,6 +324,8 @@ def main():
                         balls[this_ball]["ball-in"] = True
                         print("\n>>>>>>>>>>>>>> " + this_ball + " goes into the field at " + tmp_t_str + "\n")
                     # Else, the ball was IN, do nothing
+
+
 
                     ###############################################
                     # Identify ball-player interference:
@@ -332,7 +349,7 @@ def main():
 
                             print_results(balls[this_ball]["player"], "touches", this_ball, "end", tmp_t_str)
                             print_results(balls[this_ball]["player"], "hasPosition", players[balls[this_ball]["player"]]["position"], "end", tmp_t_str)
-                            print_results(this_ball, "hasPosition", balls[this_ball]["position"], "end", tmp_t_str)
+                            ###### print_results(this_ball, "hasPosition", balls[this_ball]["position"], "end", tmp_t_str)
                             print_results(balls[this_ball]["player"], "isInvolvedIn", "BallTouch", "end", tmp_t_str)
 
                             players[balls[this_ball]["player"]]["ball-possession"] = False
@@ -348,7 +365,7 @@ def main():
 
                             print_results(balls[this_ball]["player"], "touches", this_ball, "begin", tmp_t_str)
                             print_results(balls[this_ball]["player"], "hasPosition", players[balls[this_ball]["player"]]["position"], "begin", tmp_t_str)
-                            print_results(this_ball, "hasPosition", balls[this_ball]["position"], "begin", tmp_t_str)
+                            ##### print_results(this_ball, "hasPosition", balls[this_ball]["position"], "begin", tmp_t_str)
                             print_results(balls[this_ball]["player"], "isInvolvedIn", "BallTouch", "begin", tmp_t_str)
 
                         # Else, if the ball was controlled by someone different
@@ -356,7 +373,7 @@ def main():
 
                             print_results(balls[this_ball]["player"], "touches", this_ball, "end", tmp_t_str)
                             print_results(balls[this_ball]["player"], "hasPosition", players[balls[this_ball]["player"]]["position"], "end", tmp_t_str)
-                            print_results(this_ball, "hasPosition", balls[this_ball]["position"], "end", tmp_t_str)
+                            ##### print_results(this_ball, "hasPosition", balls[this_ball]["position"], "end", tmp_t_str)
                             print_results(balls[this_ball]["player"], "isInvolvedIn", "BallTouch", "end", tmp_t_str)
 
                             players[balls[this_ball]["player"]]["ball-possession"] = False
@@ -365,7 +382,7 @@ def main():
 
                             print_results(balls[this_ball]["player"], "touches", this_ball, "begin", tmp_t_str)
                             print_results(balls[this_ball]["player"], "hasPosition", players[balls[this_ball]["player"]]["position"], "begin", tmp_t_str)
-                            print_results(this_ball, "hasPosition", balls[this_ball]["position"], "begin", tmp_t_str)
+                            ##### print_results(this_ball, "hasPosition", balls[this_ball]["position"], "begin", tmp_t_str)
                             print_results(balls[this_ball]["player"], "isInvolvedIn", "BallTouch", "begin", tmp_t_str)
 
                         # Else, if the ball was controlled by same player, do nothing
@@ -488,23 +505,27 @@ def main():
                         # If the player was not challenging someone previously, do nothing
 
 
+
             elif tmp_type == "referee":
-                # Update referee location and print
+                # Update referee location
                 this_referee = SID_MAP[words[0]]["label"]
                 this_leg = SID_MAP[words[0]]["leg"]
                 referees[this_referee][this_leg] = tmp_location
                 referees[this_referee]["location"] = get_average(referees[this_referee]["left"], referees[this_referee]["right"])
                 referees[this_referee]["position"] = this_referee + "position" + tmp_ts_str
-                print_results_new(PREFIX_SO + this_referee, PREFIX_SO + "hasPosition", PREFIX_SO + referees[this_referee]["position"], "begin", tmp_ts_str, tmp_t_str)
+                # and print
+                # print_results_new(PREFIX_SO + this_referee, PREFIX_SO + "hasPosition", PREFIX_SO + referees[this_referee]["position"], "begin", tmp_ts_str, tmp_t_str)
+
 
 
             elif tmp_type == "glove":
-                # Update glove position and print
+                # Update glove position
                 this_glove = SID_MAP[words[0]]["label"]
                 gloves[this_glove]["location"] = tmp_location
                 gloves[this_glove]["position"] = this_glove + "position" + tmp_ts_str
-                print_results_new(PREFIX_SO + this_glove, PREFIX_SO + "hasPosition", PREFIX_SO + gloves[this_glove]["position"], "begin", tmp_ts_str, tmp_t_str)
-                print_results_new(PREFIX_SO + gloves[this_glove]["position"], "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", PREFIX_LITERATE + "GlovePosition", "begin", tmp_ts_str, tmp_t_str)
+                # and print
+                # print_results_new(PREFIX_SO + this_glove, PREFIX_SO + "hasPosition", PREFIX_SO + gloves[this_glove]["position"], "begin", tmp_ts_str, tmp_t_str)
+                # print_results_new(PREFIX_SO + gloves[this_glove]["position"], "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", PREFIX_LITERATE + "GlovePosition", "begin", tmp_ts_str, tmp_t_str)
 
 
             else:
