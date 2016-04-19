@@ -397,7 +397,7 @@ def main():
                 if players[this_player]["location"][1] > teams[this_team]["own-half-min"] and players[this_player]["location"][1] < teams[this_team]["own-half-max"]:
                     print_results_new(PREFIX_SO + this_player, RDF_TYPE, PREFIX_SO + "PlayerInOwnHalf", tmp_ts_str, tmp_t_str)
                 #else:
-                #    print_results_new(PREFIX_SO + this_player, RDF_TYPE, PREFIX_SO + "PlayerNotInOwnHalf", tmp_ts_str, tmp_t_str)
+                    print_results_new(PREFIX_SO + this_player, RDF_TYPE, PREFIX_SO + "PlayerNotInOwnHalf", tmp_ts_str, tmp_t_str)
                 ###############################################
 
 
