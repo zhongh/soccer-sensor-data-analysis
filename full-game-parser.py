@@ -11,7 +11,7 @@ from helpers import *
 PREFIX_SO = ""
 PREFIX_LITERATE = ""
 PREFIX_COLON = ":"
-RDFS_TYPE = "a"
+RDF_TYPE = "a"
 
 HAS_SENSOR = "<" + PREFIX + "hasSensor> "
 HAS_SAMPLING_TIME = "<" + PREFIX + "hasSamplingTime> "
@@ -257,7 +257,7 @@ def main():
                     # Print ball position output
                     #
                     print_results_new(PREFIX_SO + this_ball, PREFIX_SO + "hasPosition", PREFIX_SO + balls[this_ball]["position"], tmp_ts_str, tmp_t_str)
-                    print_results_new(PREFIX_SO + this_ball, RDFS_TYPE, PREFIX_SO + "BackupBall", tmp_ts_str, tmp_t_str)
+                    print_results_new(PREFIX_SO + this_ball, RDF_TYPE, PREFIX_SO + "BackupBall", tmp_ts_str, tmp_t_str)
                     #########################################
 
                     game_status = False or is_out(tmp_location)
@@ -269,7 +269,7 @@ def main():
                     if balls[this_ball]["ball-in"]:
                         # Update ball status
                         balls[this_ball]["ball-in"] = False
-                        print("\n<<<<<<<<<<<< " + this_ball + " goes out of bounds at " + tmp_t_str + "\n")
+                        #print("\n<<<<<<<<<<<< " + this_ball + " goes out of bounds at " + tmp_t_str + "\n")
 
                         # Also set corresponding player and ball status to False or None, and print out end statements!!! ball-player, player-player, and offsides
 
@@ -292,7 +292,7 @@ def main():
                     #########################################
                     # Print ball position output
                     print_results_new(PREFIX_SO + this_ball, PREFIX_SO + "hasPosition", PREFIX_SO + balls[this_ball]["position"], tmp_ts_str, tmp_t_str)
-                    print_results_new(PREFIX_SO + this_ball, RDFS_TYPE, PREFIX_SO + "InFieldBall", tmp_ts_str, tmp_t_str)
+                    print_results_new(PREFIX_SO + this_ball, RDF_TYPE, PREFIX_SO + "InFieldBall", tmp_ts_str, tmp_t_str)
                     #########################################
 
                     # Update the ball location
@@ -301,7 +301,7 @@ def main():
                     # If the ball was OUT
                     if not balls[this_ball]["ball-in"]:
                         balls[this_ball]["ball-in"] = True
-                        print("\n>>>>>>>>>>>>>> " + this_ball + " goes into the field at " + tmp_t_str + "\n")
+                        #print("\n>>>>>>>>>>>>>> " + this_ball + " goes into the field at " + tmp_t_str + "\n")
                     # Else, the ball was IN, do nothing
 
 
@@ -384,7 +384,7 @@ def main():
                 #
                 print_results_new(PREFIX_SO + this_player, PREFIX_SO + "hasPosition", PREFIX_SO + players[this_player]["position"], tmp_ts_str, tmp_t_str)
                 if not game_status:
-                    print_results_new(PREFIX_SO + players[this_player]["position"], RDFS_TYPE, PREFIX_LITERATE + "OffsideIrreleventPosition", tmp_ts_str, tmp_t_str)
+                    print_results_new(PREFIX_SO + players[this_player]["position"], RDF_TYPE, PREFIX_LITERATE + "OffsideIrreleventPosition", tmp_ts_str, tmp_t_str)
                 ###############################################
 
                 # Update player location
@@ -395,9 +395,9 @@ def main():
                 # Annotate player in own half
                 #
                 if players[this_player]["location"][1] > teams[this_team]["own-half-min"] and players[this_player]["location"][1] < teams[this_team]["own-half-max"]:
-                    print_results_new(PREFIX_SO + this_player, RDFS_TYPE, PREFIX_SO + "PlayerInOwnHalf", tmp_ts_str, tmp_t_str)
+                    print_results_new(PREFIX_SO + this_player, RDF_TYPE, PREFIX_SO + "PlayerInOwnHalf", tmp_ts_str, tmp_t_str)
                 else:
-                    print_results_new(PREFIX_SO + this_player, RDFS_TYPE, PREFIX_SO + "PlayerNotInOwnHalf", tmp_ts_str, tmp_t_str)
+                    print_results_new(PREFIX_SO + this_player, RDF_TYPE, PREFIX_SO + "PlayerNotInOwnHalf", tmp_ts_str, tmp_t_str)
                 ###############################################
 
 
@@ -412,9 +412,9 @@ def main():
                 #
                 for teammate in [(k, v) for (k, v) in players.items() if v["team"] == this_team]:
                     if teammate[0] == second_last_player:
-                        print_results_new(PREFIX_SO + teammate[0], RDFS_TYPE, PREFIX_SO + "SecondLastPlayer", tmp_ts_str,  tmp_t_str)
+                        print_results_new(PREFIX_SO + teammate[0], RDF_TYPE, PREFIX_SO + "SecondLastPlayer", tmp_ts_str,  tmp_t_str)
                     else:
-                        print_results_new(PREFIX_SO + teammate[0], RDFS_TYPE, PREFIX_SO + "NotSecondLastPlayer", tmp_ts_str,  tmp_t_str)
+                        print_results_new(PREFIX_SO + teammate[0], RDF_TYPE, PREFIX_SO + "NotSecondLastPlayer", tmp_ts_str,  tmp_t_str)
                 ##############################################
 
 
@@ -476,14 +476,14 @@ def main():
                 ###############################################
                 # and print
                 print_results_new(PREFIX_SO + this_glove, PREFIX_SO + "hasPosition", PREFIX_SO + gloves[this_glove]["position"], tmp_ts_str, tmp_t_str)
-                print_results_new(PREFIX_SO + gloves[this_glove]["position"], "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", PREFIX_LITERATE + "GlovePosition", tmp_ts_str, tmp_t_str)
+                #print_results_new(PREFIX_SO + gloves[this_glove]["position"], RDF_TYPE, PREFIX_LITERATE + "GlovePosition", tmp_ts_str, tmp_t_str)
                 ###############################################
 
             else:
                 exit(tmp_type)
 
 
-        print("Total computation time elapsed: " + str(time.time() - t) + " seconds")
+        #print("Total computation time elapsed: " + str(time.time() - t) + " seconds")
 
 
 if __name__ == "__main__":
