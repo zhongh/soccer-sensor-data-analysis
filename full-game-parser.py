@@ -8,10 +8,10 @@ from helpers import *
 #######################################
 # Ontology variables
 
-PREFIX_SO = "http://tw.rpi.edu/web/Courses/Ontologies/2016/Soccer_Offside/"
-PREFIX_LITERATE = "http://tw.rpi.edu/web/Courses/Ontologies/2016/Soccer_Offside/"
+PREFIX_SO = ""
+PREFIX_LITERATE = ""
 PREFIX_COLON = ":"
-RDFS_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+RDFS_TYPE = "a"
 
 HAS_SENSOR = "<" + PREFIX + "hasSensor> "
 HAS_SAMPLING_TIME = "<" + PREFIX + "hasSamplingTime> "
@@ -228,12 +228,13 @@ def main():
             tmp_t = tmp_ts - APPROXIMATE_START_TIME
             tmp_t_str = display_seconds_as_minutes(tmp_t)
             if tmp_t < 0:
-                print(words[1])
+                # print(words[1])
                 continue
 
             # Modify here for termination time
             if tmp_t > 300:
-                break
+                break       # If you want to stop at the time specified, uncomment this line
+                pass
 
             # Type int for coordinates
             tmp_location = tuple(int(x) for x in words[2:5])
@@ -252,14 +253,14 @@ def main():
                 # If the ball is OUT
                 if is_out(tmp_location):
 
-                    game_status = False
-
                     #########################################
                     # Print ball position output
                     #
                     print_results_new(PREFIX_SO + this_ball, PREFIX_SO + "hasPosition", PREFIX_SO + balls[this_ball]["position"], tmp_ts_str, tmp_t_str)
                     print_results_new(PREFIX_SO + this_ball, RDFS_TYPE, PREFIX_SO + "BackupBall", tmp_ts_str, tmp_t_str)
                     #########################################
+
+                    game_status = False or is_out(tmp_location)
 
                     # Update the ball location
                     balls[this_ball]["location"] = tmp_location
