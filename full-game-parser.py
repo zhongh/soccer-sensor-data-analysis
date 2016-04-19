@@ -329,7 +329,7 @@ def main():
                         ###############################################
                         # Annotate ball touch
                         #
-                        print_results_new(PREFIX_SO + balls[this_ball]["player"], PREFIX_SO + "isInvolvedIn", PREFIX_SO + "BallTouch", tmp_ts_str, tmp_t_str)
+                        #print_results_new(PREFIX_SO + balls[this_ball]["player"], PREFIX_SO + "isInvolvedIn", PREFIX_SO + "BallTouch", tmp_ts_str, tmp_t_str)
                         print_results_new(PREFIX_SO + balls[this_ball]["player"], PREFIX_SO + "touches", PREFIX_SO + this_ball, tmp_ts_str, tmp_t_str)
                         ###############################################
 
