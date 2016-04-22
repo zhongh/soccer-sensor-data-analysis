@@ -79,8 +79,9 @@ SID_MAP = {
 #######################################
 # Initial conditions
 
-INITIAL_TIME = 10629342490369879
-APPROXIMATE_START_TIME = 119
+# FIRST_HALF_START_TIMESTAMP = 10629342490369879
+FIRST_HALF_START_TIMESTAMP = 10749277974056600
+# APPROXIMATE_START_TIME = 119
 
 BALL_CONTROL_DISTANCE = 750
 
@@ -130,10 +131,6 @@ def print_list_with_linebreak(list):
     """
     for x in list:
         print(x)
-
-
-def ball_out(x, y):
-    return x < X_MIN or x > X_MAX or y < Y_MIN or y > Y_MAX
 
 
 def is_out(loc):
@@ -218,21 +215,22 @@ def main():
 
             words = line.strip().split(",")[0:5]
 
-            timestamp = int(words[1]) - INITIAL_TIME
-            timestamp_str = str(timestamp)
+            timestamp_raw = int(words[1]) - FIRST_HALF_START_TIMESTAMP
+            timestamp_raw_str = str(timestamp_raw)
 
             # Format time from picosends into MM:SS
-            tmp_ts = round(timestamp * 1e-12, 4)
-            tmp_ts_str = str(tmp_ts)
+            timestamp_float = round(timestamp_raw * 1e-12, 4)
+            timestamp_float_str = str(timestamp_float)
 
-            tmp_t = tmp_ts - APPROXIMATE_START_TIME
+            tmp_t = timestamp_float
             tmp_t_str = display_seconds_as_minutes(tmp_t)
-            if tmp_t < 0:
-                # print(words[1])
+
+            if tmp_t < 266:
                 continue
 
+
             # Modify here for termination time
-            if tmp_t > 300:
+            if tmp_t > 268.3:
                 break       # If you want to stop at the time specified, uncomment this line
                 pass
 
@@ -247,7 +245,7 @@ def main():
 
                 this_ball = SID_MAP[words[0]]["label"]
 
-                balls[this_ball]["position"] = this_ball + "position" + timestamp_str
+                balls[this_ball]["position"] = this_ball + "position" + timestamp_raw_str
 
 
                 # If the ball is OUT
@@ -256,8 +254,8 @@ def main():
                     #########################################
                     # Print ball position output
                     #
-                    print_results_new(PREFIX_SO + this_ball, PREFIX_SO + "hasPosition", PREFIX_SO + balls[this_ball]["position"], tmp_ts_str, tmp_t_str)
-                    print_results_new(PREFIX_SO + this_ball, RDF_TYPE, PREFIX_SO + "BackupBall", tmp_ts_str, tmp_t_str)
+                    print_results_new(PREFIX_SO + this_ball, PREFIX_SO + "hasPosition", PREFIX_SO + balls[this_ball]["position"], timestamp_float_str, tmp_t_str)
+                    print_results_new(PREFIX_SO + this_ball, RDF_TYPE, PREFIX_SO + "BackupBall", timestamp_float_str, tmp_t_str)
                     #########################################
 
                     game_status = False or is_out(tmp_location)
@@ -291,8 +289,8 @@ def main():
 
                     #########################################
                     # Print ball position output
-                    print_results_new(PREFIX_SO + this_ball, PREFIX_SO + "hasPosition", PREFIX_SO + balls[this_ball]["position"], tmp_ts_str, tmp_t_str)
-                    print_results_new(PREFIX_SO + this_ball, RDF_TYPE, PREFIX_SO + "InFieldBall", tmp_ts_str, tmp_t_str)
+                    print_results_new(PREFIX_SO + this_ball, PREFIX_SO + "hasPosition", PREFIX_SO + balls[this_ball]["position"], timestamp_float_str, tmp_t_str)
+                    print_results_new(PREFIX_SO + this_ball, RDF_TYPE, PREFIX_SO + "InFieldBall", timestamp_float_str, tmp_t_str)
                     #########################################
 
                     # Update the ball location
@@ -329,8 +327,8 @@ def main():
                         ###############################################
                         # Annotate ball touch
                         #
-                        #print_results_new(PREFIX_SO + balls[this_ball]["player"], PREFIX_SO + "isInvolvedIn", PREFIX_SO + "BallTouch", tmp_ts_str, tmp_t_str)
-                        print_results_new(PREFIX_SO + balls[this_ball]["player"], PREFIX_SO + "touches", PREFIX_SO + this_ball, tmp_ts_str, tmp_t_str)
+                        #print_results_new(PREFIX_SO + balls[this_ball]["player"], PREFIX_SO + "isInvolvedIn", PREFIX_SO + "ball_touch", timestamp_float_str, tmp_t_str)
+                        print_results_new(PREFIX_SO + balls[this_ball]["player"], PREFIX_SO + "touches", PREFIX_SO + this_ball, timestamp_float_str, tmp_t_str)
                         ###############################################
 
                         # Calculate player isNearerToGoalline than properties
@@ -346,9 +344,12 @@ def main():
                         distance_of_second_last_defender_to_opponent_goal_line = (players[second_last_opponent]["location"][1] - opponent_goal_line) * opponent_goal_line_sign
                         distance_of_ball_to_opponent_goal_line = (tmp_location[1] - opponent_goal_line) * opponent_goal_line_sign
 
+                        # print("***Second last opponnet " + second_last_opponent + " has distance " + str(distance_of_second_last_defender_to_opponent_goal_line) + " to defender goal line at " + str(opponent_goal_line))
+                        # print("***Ball " + this_ball + " has distance " + str(distance_of_ball_to_opponent_goal_line) + " to defender goal line at " + str(opponent_goal_line))
+
                         for this_player in {k:v for (k,v) in players.items() if v["team"] == this_team}:
                             distance_to_opponent_goal_line = (players[this_player]["location"][1] - opponent_goal_line) * opponent_goal_line_sign
-                            # print(distance_to_opponent_goal_line)
+                            # print("***Player " + this_player + " has distance " + str(distance_to_opponent_goal_line) + " to defender goal line at " + str(opponent_goal_line))
 
                             if distance_to_opponent_goal_line < HALF_LENGTH and distance_to_opponent_goal_line < distance_of_second_last_defender_to_opponent_goal_line and distance_to_opponent_goal_line < distance_of_ball_to_opponent_goal_line:
                                     players[this_player]["in-offside-position"] = True
@@ -359,10 +360,9 @@ def main():
                             # Annotate isNearer than
                             #
                             if distance_to_opponent_goal_line < distance_of_second_last_defender_to_opponent_goal_line:
-                                print(second_last_opponent)
-                                print_results_new(PREFIX_SO + this_player, PREFIX_SO + "isNearerToGoalLineThan", PREFIX_SO + second_last_opponent, tmp_ts_str, tmp_t_str)
+                                print_results_new(PREFIX_SO + this_player, PREFIX_SO + "isNearerToDefenderGoalLineThan", PREFIX_SO + second_last_opponent, timestamp_float_str, tmp_t_str)
                             if distance_to_opponent_goal_line < distance_of_ball_to_opponent_goal_line:
-                                print_results_new(PREFIX_SO + this_player, PREFIX_SO + "isNearerToGoalLineThan", PREFIX_SO + this_ball, tmp_ts_str, tmp_t_str)
+                                print_results_new(PREFIX_SO + this_player, PREFIX_SO + "isNearerToDefenderGoalLineThan", PREFIX_SO + this_ball, timestamp_float_str, tmp_t_str)
                             ###############################################
 
 
@@ -377,14 +377,14 @@ def main():
                 this_leg = SID_MAP[words[0]]["leg"]
                 this_team = SID_MAP[words[0]]["team"]
 
-                players[this_player]["position"] = this_player + "Position" + timestamp_str
+                players[this_player]["position"] = this_player + "Position" + timestamp_raw_str
 
                 ###############################################
                 # annotate player hasPosition triple
                 #
-                print_results_new(PREFIX_SO + this_player, PREFIX_SO + "hasPosition", PREFIX_SO + players[this_player]["position"], tmp_ts_str, tmp_t_str)
+                print_results_new(PREFIX_SO + this_player, PREFIX_SO + "hasPosition", PREFIX_SO + players[this_player]["position"], timestamp_float_str, tmp_t_str)
                 if not game_status:
-                    print_results_new(PREFIX_SO + players[this_player]["position"], RDF_TYPE, PREFIX_LITERATE + "OffsideIrreleventPosition", tmp_ts_str, tmp_t_str)
+                    print_results_new(PREFIX_SO + players[this_player]["position"], RDF_TYPE, PREFIX_LITERATE + "OffsideIrreleventPosition", timestamp_float_str, tmp_t_str)
                 ###############################################
 
                 # Update player location
@@ -395,9 +395,9 @@ def main():
                 # Annotate player in own half
                 #
                 if players[this_player]["location"][1] > teams[this_team]["own-half-min"] and players[this_player]["location"][1] < teams[this_team]["own-half-max"]:
-                    print_results_new(PREFIX_SO + this_player, RDF_TYPE, PREFIX_SO + "PlayerInOwnHalf", tmp_ts_str, tmp_t_str)
+                    print_results_new(PREFIX_SO + this_player, RDF_TYPE, PREFIX_SO + "PlayerInOwnHalf", timestamp_float_str, tmp_t_str)
                 else:
-                    print_results_new(PREFIX_SO + this_player, RDF_TYPE, PREFIX_SO + "PlayerNotInOwnHalf", tmp_ts_str, tmp_t_str)
+                    print_results_new(PREFIX_SO + this_player, RDF_TYPE, PREFIX_SO + "PlayerNotInOwnHalf", timestamp_float_str, tmp_t_str)
                 ###############################################
 
 
@@ -412,9 +412,9 @@ def main():
                 #
                 for teammate in [(k, v) for (k, v) in players.items() if v["team"] == this_team]:
                     if teammate[0] == second_last_player:
-                        print_results_new(PREFIX_SO + teammate[0], RDF_TYPE, PREFIX_SO + "SecondLastPlayer", tmp_ts_str,  tmp_t_str)
-                    #else:
-                    #    print_results_new(PREFIX_SO + teammate[0], RDF_TYPE, PREFIX_SO + "NotSecondLastPlayer", tmp_ts_str,  tmp_t_str)
+                        print_results_new(PREFIX_SO + teammate[0], RDF_TYPE, PREFIX_SO + "SecondLastPlayer", timestamp_float_str,  tmp_t_str)
+                    # else:
+                    #    print_results_new(PREFIX_SO + teammate[0], RDF_TYPE, PREFIX_SO + "NotSecondLastPlayer", timestamp_float_str,  tmp_t_str)
                 ##############################################
 
 
@@ -441,8 +441,8 @@ def main():
                         ###############################################
                         # Annotate player challenge
                         #
-                        print_results_new(PREFIX_SO + this_player, PREFIX_SO + "isInvolvedIn", PREFIX_SO + "OpponentChallenge", tmp_ts_str, tmp_t_str)
-                        print_results_new(PREFIX_SO + nearest_opponent, PREFIX_SO + "isInvolvedIn", PREFIX_SO + "OpponentChallenge", tmp_ts_str, tmp_t_str)
+                        print_results_new(PREFIX_SO + this_player, PREFIX_SO + "isInvolvedIn", PREFIX_SO + "opponent_challenge", timestamp_float_str, tmp_t_str)
+                        print_results_new(PREFIX_SO + nearest_opponent, PREFIX_SO + "isInvolvedIn", PREFIX_SO + "opponent_challenge", timestamp_float_str, tmp_t_str)
                         ###############################################
 
                     # Else, the distance is not close enough:
@@ -461,10 +461,10 @@ def main():
                 this_leg = SID_MAP[words[0]]["leg"]
                 referees[this_referee][this_leg] = tmp_location
                 referees[this_referee]["location"] = get_average(referees[this_referee]["left"], referees[this_referee]["right"])
-                referees[this_referee]["position"] = this_referee + "position" + timestamp_str
+                referees[this_referee]["position"] = this_referee + "position" + timestamp_raw_str
                 ###############################################
                 # and print
-                print_results_new(PREFIX_SO + this_referee, PREFIX_SO + "hasPosition", PREFIX_SO + referees[this_referee]["position"], tmp_ts_str, tmp_t_str)
+                print_results_new(PREFIX_SO + this_referee, PREFIX_SO + "hasPosition", PREFIX_SO + referees[this_referee]["position"], timestamp_float_str, tmp_t_str)
                 ###############################################
 
 
@@ -472,11 +472,11 @@ def main():
                 # Update glove position
                 this_glove = SID_MAP[words[0]]["label"]
                 gloves[this_glove]["location"] = tmp_location
-                gloves[this_glove]["position"] = this_glove + "position" + timestamp_str
+                gloves[this_glove]["position"] = this_glove + "position" + timestamp_raw_str
                 ###############################################
                 # and print
-                print_results_new(PREFIX_SO + this_glove, PREFIX_SO + "hasPosition", PREFIX_SO + gloves[this_glove]["position"], tmp_ts_str, tmp_t_str)
-                #print_results_new(PREFIX_SO + gloves[this_glove]["position"], RDF_TYPE, PREFIX_LITERATE + "GlovePosition", tmp_ts_str, tmp_t_str)
+                print_results_new(PREFIX_SO + this_glove, PREFIX_SO + "hasPosition", PREFIX_SO + gloves[this_glove]["position"], timestamp_float_str, tmp_t_str)
+                #print_results_new(PREFIX_SO + gloves[this_glove]["position"], RDF_TYPE, PREFIX_LITERATE + "GlovePosition", timestamp_float_str, tmp_t_str)
                 ###############################################
 
             else:
