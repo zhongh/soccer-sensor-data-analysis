@@ -314,7 +314,6 @@ def main():
                     nearest_player = players_sorted[0][0]
                     nearest_distance = players_sorted[0][1]["distance-to-ball"]
 
-
                     # If the nearest player has >= 1000mm to the ball then nobody has the ball
                     if nearest_distance >= BALL_CONTROL_DISTANCE:
                         balls[this_ball]["player"] = None
@@ -335,21 +334,27 @@ def main():
 
                         this_team = players[nearest_player]["team"]
                         opponent = teams[this_team]["opponent"]
-                        if teams[opponent]["second-last-player"] == None:
-                            continue
-                        second_last_opponent = teams[opponent]["second-last-player"]
                         opponent_goal_line = teams[opponent]["goal-line"]
                         opponent_goal_line_sign = teams[opponent]["sign"]
+
+                        if teams[opponent]["second-last-player"] == None:
+                            continue
+                        else:
+                            second_last_opponent = teams[opponent]["second-last-player"]
+
+
+                        ###############################################
+                        # Annotate second last player of the opponents
+                        #
+                        print_results_new(PREFIX_SO + second_last_opponent, RDF_TYPE, PREFIX_SO + "SecondLastPlayer", timestamp_float_str,  tmp_t_str)
+                        ##############################################
+
 
                         distance_of_second_last_defender_to_opponent_goal_line = (players[second_last_opponent]["location"][1] - opponent_goal_line) * opponent_goal_line_sign
                         distance_of_ball_to_opponent_goal_line = (tmp_location[1] - opponent_goal_line) * opponent_goal_line_sign
 
-                        # print("***Second last opponnet " + second_last_opponent + " has distance " + str(distance_of_second_last_defender_to_opponent_goal_line) + " to defender goal line at " + str(opponent_goal_line))
-                        # print("***Ball " + this_ball + " has distance " + str(distance_of_ball_to_opponent_goal_line) + " to defender goal line at " + str(opponent_goal_line))
-
                         for this_player in {k:v for (k,v) in players.items() if v["team"] == this_team}:
                             distance_to_opponent_goal_line = (players[this_player]["location"][1] - opponent_goal_line) * opponent_goal_line_sign
-                            # print("***Player " + this_player + " has distance " + str(distance_to_opponent_goal_line) + " to defender goal line at " + str(opponent_goal_line))
 
                             if distance_to_opponent_goal_line < HALF_LENGTH and distance_to_opponent_goal_line < distance_of_second_last_defender_to_opponent_goal_line and distance_to_opponent_goal_line < distance_of_ball_to_opponent_goal_line:
                                     players[this_player]["in-offside-position"] = True
@@ -403,20 +408,19 @@ def main():
 
                 # Compute second last player of the team
                 second_last_player = sorted([(k, v) for (k, v) in players.items() if v["team"] == this_team], key=lambda p: (p[1]["location"][1] - teams[this_team]["goal-line"]) * teams[this_team]["sign"])[1][0]
-                if teams[this_team]["second-last-player"] != second_last_player:
-                    teams[this_team]["second-last-player"] = second_last_player
+                teams[this_team]["second-last-player"] = second_last_player
 
 
-                ###############################################
-                # Annotate second last player of his team, regardless ball in or out (if game_status:)
-                #
-                for teammate in [(k, v) for (k, v) in players.items() if v["team"] == this_team]:
-                    if teammate[0] == second_last_player:
-                        print_results_new(PREFIX_SO + teammate[0], RDF_TYPE, PREFIX_SO + "SecondLastPlayer", timestamp_float_str,  tmp_t_str)
-                    # else:
-                    #    print_results_new(PREFIX_SO + teammate[0], RDF_TYPE, PREFIX_SO + "NotSecondLastPlayer", timestamp_float_str,  tmp_t_str)
-                ##############################################
-
+                # ###############################################
+                # # Annotate second last player of his team, regardless ball in or out (if game_status:)
+                # # **(Now we try to annotate this at every ball touch, not when player sensors update)
+                # #
+                # for teammate in [(k, v) for (k, v) in players.items() if v["team"] == this_team]:
+                #     if teammate[0] == second_last_player:
+                #         print_results_new(PREFIX_SO + teammate[0], RDF_TYPE, PREFIX_SO + "SecondLastPlayer", timestamp_float_str,  tmp_t_str)
+                #     # else:
+                #     #    print_results_new(PREFIX_SO + teammate[0], RDF_TYPE, PREFIX_SO + "NotSecondLastPlayer", timestamp_float_str,  tmp_t_str)
+                # ##############################################
 
 
                 # Compute if player challenges an opponent
