@@ -17,7 +17,7 @@ RDF_TYPE = "a"
 
 # Initial conditions:
 FIRST_HALF_START_TIMESTAMP = 10749277974056600
-BALL_CONTROL_DISTANCE = 200
+BALL_CONTROL_DISTANCE = 500
 # Team B is the red team and team A is the yellow team
 GOAL_LINE_A = Y_MIN
 GOAL_LINE_B = Y_MAX
@@ -106,9 +106,9 @@ def main():
             tmp_t_str = display_seconds_as_minutes(tmp_t)
 
             # Start and termination time
-            if tmp_t < 266:
+            if tmp_t < 1384:
                 continue
-            elif tmp_t > 268.3:
+            elif tmp_t > 1389.8:
                 break
 
             # Type int for coordinates
@@ -205,7 +205,6 @@ def main():
                         # Annotate ball touch
                         #
                         print_results_new(PREFIX_SO + balls[this_ball]["player"], PREFIX_SO + "touches", PREFIX_SO + this_ball, timestamp_float_str, tmp_t_str)
-                        #print_results_new(PREFIX_SO + balls[this_ball]["player"], PREFIX_SO + "isInvolvedIn", PREFIX_SO + "ball_touch", timestamp_float_str, tmp_t_str)
                         ###############################################
 
                         # Calculate player isNearerToGoalline than properties
@@ -227,12 +226,11 @@ def main():
                         print_results_new(PREFIX_SO + second_last_opponent, RDF_TYPE, PREFIX_SO + "SecondLastPlayer", timestamp_float_str,  tmp_t_str)
                         ##############################################
 
-
-                        distance_of_second_last_defender_to_opponent_goal_line = (players[second_last_opponent]["location"][1] - opponent_goal_line) * opponent_goal_line_sign
-                        distance_of_ball_to_opponent_goal_line = (tmp_location[1] - opponent_goal_line) * opponent_goal_line_sign
+                        distance_of_second_last_defender_to_opponent_goal_line = min(abs(players[second_last_opponent]["left"][1] - opponent_goal_line), abs(players[second_last_opponent]["right"][1] - opponent_goal_line))
+                        distance_of_ball_to_opponent_goal_line = abs(tmp_location[1] - opponent_goal_line)
 
                         for this_player in {k:v for (k,v) in players.items() if v["team"] == this_team}:
-                            distance_to_opponent_goal_line = (players[this_player]["location"][1] - opponent_goal_line) * opponent_goal_line_sign
+                            distance_to_opponent_goal_line = min(abs(players[this_player]["left"][1] - opponent_goal_line), abs(players[this_player]["right"][1] - opponent_goal_line))
 
                             if distance_to_opponent_goal_line < HALF_LENGTH and distance_to_opponent_goal_line < distance_of_second_last_defender_to_opponent_goal_line and distance_to_opponent_goal_line < distance_of_ball_to_opponent_goal_line:
                                     players[this_player]["in-offside-position"] = True
@@ -285,7 +283,7 @@ def main():
 
 
                 # Compute second last player of the team
-                second_last_player = sorted([(k, v) for (k, v) in players.items() if v["team"] == this_team], key=lambda p: (p[1]["location"][1] - teams[this_team]["goal-line"]) * teams[this_team]["sign"])[1][0]
+                second_last_player = sorted([(k, v) for (k, v) in players.items() if v["team"] == this_team], key=lambda p: min(abs(p[1]["left"][1] - teams[this_team]["goal-line"]), abs(p[1]["right"][1] - teams[this_team]["goal-line"])))[1][0]
                 teams[this_team]["second-last-player"] = second_last_player
 
 
@@ -318,13 +316,14 @@ def main():
                     # If the distance is close, then they are challengeing
                     if nearest_distance < 1500:
                         players[this_player]["challenging-opponent"] = nearest_opponent
-                        players[nearest_opponent]["challenging-opponent"] = this_player
 
                         ###############################################
                         # Annotate player challenge
                         #
                         print_results_new(PREFIX_SO + this_player, PREFIX_SO + "isInvolvedIn", PREFIX_SO + "opponent_challenge", timestamp_float_str, tmp_t_str)
-                        print_results_new(PREFIX_SO + nearest_opponent, PREFIX_SO + "isInvolvedIn", PREFIX_SO + "opponent_challenge", timestamp_float_str, tmp_t_str)
+                        if not players[nearest_opponent]["ball-possession"]:
+                            players[nearest_opponent]["challenging-opponent"] = this_player
+                            print_results_new(PREFIX_SO + nearest_opponent, PREFIX_SO + "isInvolvedIn", PREFIX_SO + "opponent_challenge", timestamp_float_str, tmp_t_str)
                         ###############################################
 
                     # Else, the distance is not close enough:
