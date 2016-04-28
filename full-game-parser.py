@@ -3,6 +3,7 @@ __author__ = 'Hao'
 import argparse
 import time
 from math import *
+import sys
 
 from helpers import *
 from metadata import *
@@ -21,6 +22,21 @@ BALL_CONTROL_DISTANCE = 500
 # Team B is the red team and team A is the yellow team
 GOAL_LINE_A = Y_MIN
 GOAL_LINE_B = Y_MAX
+
+
+# Output time intervals
+OUTPUT_TIME_INTERVALS = [
+    {"file-name": "sample-data-at-02m53s", "start": 173, "stop": 174.3},
+    {"file-name": "sample-data-at-04m26s", "start": 266, "stop": 268.3},
+    {"file-name": "sample-data-at-07m04s", "start": 424.2, "stop": 427.2},
+    {"file-name": "sample-data-at-12m21s", "start": 741.4, "stop": 742},
+    {"file-name": "sample-data-at-12m44s", "start": 763.9, "stop": 766},
+    {"file-name": "sample-data-at-15m28s", "start": 927.9, "stop": 929.5},
+    {"file-name": "sample-data-at-20m40s", "start": 1240, "stop": 1241.5},
+    {"file-name": "sample-data-at-21m11s", "start": 1271.9, "stop": 1274.3},
+    {"file-name": "sample-data-at-22m07s", "start": 1327.2, "stop": 1329.5},
+    {"file-name": "sample-data-at-23m04s", "start": 1383.9, "stop": 1389.8}
+]
 
 
 def main():
@@ -90,6 +106,13 @@ def main():
 
         game_status = False
 
+        time_interval_count = 0
+        time_interval_max = len(OUTPUT_TIME_INTERVALS)
+
+
+        output_file = open(OUTPUT_TIME_INTERVALS[time_interval_count]["file-name"], "w+")
+        sys.stdout = output_file
+
 
         for line in f:
 
@@ -106,10 +129,25 @@ def main():
             tmp_t_str = display_seconds_as_minutes(tmp_t)
 
             # Start and termination time
-            if tmp_t < 1384:
+            # if tmp_t < 1384:
+            #     continue
+            # elif tmp_t > 1389.8:
+            #     break
+
+            if tmp_t < OUTPUT_TIME_INTERVALS[time_interval_count]["start"]:
                 continue
-            elif tmp_t > 1389.8:
-                break
+            elif tmp_t > OUTPUT_TIME_INTERVALS[time_interval_count]["stop"]:
+                output_file.close()
+                if time_interval_count < time_interval_max:
+                    time_interval_count += 1
+                else:
+                    break
+                output_file = open(OUTPUT_TIME_INTERVALS[time_interval_count]["file-name"], "w+")
+                sys.stdout = output_file
+                continue
+
+
+
 
             # Type int for coordinates
             tmp_location = tuple(int(x) for x in words[2:5])
@@ -258,7 +296,7 @@ def main():
                 this_leg = SID_MAP[words[0]]["leg"]
                 this_team = SID_MAP[words[0]]["team"]
 
-                players[this_player]["position"] = this_player + "Position" + timestamp_raw_str
+                players[this_player]["position"] = this_player + "position" + timestamp_raw_str
 
                 ###############################################
                 # annotate player hasPosition triple
