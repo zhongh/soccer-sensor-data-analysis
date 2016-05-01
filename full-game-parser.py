@@ -7,36 +7,19 @@ import sys
 
 from helpers import *
 from metadata import *
-
-
-# Ontology prefixes and abbreviations
-PREFIX_SO = ""
-PREFIX_LITERATE = ""
-PREFIX_COLON = ":"
-RDF_TYPE = "a"
+from parameters import *
 
 
 # Initial conditions:
-FIRST_HALF_START_TIMESTAMP = 10749277974056600
-BALL_CONTROL_DISTANCE = 500
-# Team B is the red team and team A is the yellow team
+
+from output_time_intervals_1st_half import *
+VIDEO_START_TIMESTAMP = 10749277974056600
 GOAL_LINE_A = Y_MIN
 GOAL_LINE_B = Y_MAX
+SIGN_A = +1
+SIGN_B = -1
 
 
-# Output time intervals
-OUTPUT_TIME_INTERVALS = [
-    {"file-name": "sample-data-at-02m53s", "start": 173, "stop": 174.3},
-    {"file-name": "sample-data-at-04m26s", "start": 266, "stop": 268.3},
-    {"file-name": "sample-data-at-07m04s", "start": 424.2, "stop": 427.2},
-    {"file-name": "sample-data-at-12m21s", "start": 741.4, "stop": 742},
-    {"file-name": "sample-data-at-12m44s", "start": 763.9, "stop": 766},
-    {"file-name": "sample-data-at-15m28s", "start": 927.9, "stop": 929.5},
-    {"file-name": "sample-data-at-20m40s", "start": 1240, "stop": 1241.5},
-    {"file-name": "sample-data-at-21m11s", "start": 1271.9, "stop": 1274.3},
-    {"file-name": "sample-data-at-22m07s", "start": 1327.2, "stop": 1329.5},
-    {"file-name": "sample-data-at-23m04s", "start": 1383.9, "stop": 1389.8}
-]
 
 
 def main():
@@ -63,7 +46,7 @@ def main():
             if SID_MAP[sid]["type"] is "ball":
                 balls[SID_MAP[sid]["label"]] = {
                     "location": (0, 0, 0),
-                    "ball-in": False,
+                    "in-field": False,
                     "player": None,
                     "position": None
                 }
@@ -97,17 +80,17 @@ def main():
                     "position": None
                 }
 
-        # Setting up teams
+        # Setting up first half teams
         teams = {
-            "A": {"label": "TeamA", "opponent": "B", "is-attacking": None, "second-last-player": None, "goal-line": Y_MIN, "sign": +1, "own-half-min": Y_MIN, "own-half-max": HALF_LINE},
-            "B": {"label": "TeamB", "opponent": "A", "is-attacking": None, "second-last-player": None, "goal-line": Y_MAX, "sign": -1, "own-half-min": HALF_LINE, "own-half-max": Y_MAX}
+            "A": {"label": "TeamA", "opponent": "B", "is-attacking": None, "second-last-player": None, "goal-line": GOAL_LINE_A, "sign": SIGN_A},
+            "B": {"label": "TeamB", "opponent": "A", "is-attacking": None, "second-last-player": None, "goal-line": GOAL_LINE_B, "sign": SIGN_B}
         }
 
 
-        game_status = False
+        game_status = 0
 
         time_interval_count = 0
-        time_interval_max = len(OUTPUT_TIME_INTERVALS)
+        time_interval_max = len(OUTPUT_TIME_INTERVALS) - 1
 
 
         output_file = open(OUTPUT_TIME_INTERVALS[time_interval_count]["file-name"], "w+")
@@ -118,7 +101,7 @@ def main():
 
             words = line.strip().split(",")[0:5]
 
-            timestamp_raw = int(words[1]) - FIRST_HALF_START_TIMESTAMP
+            timestamp_raw = int(words[1]) - VIDEO_START_TIMESTAMP
             timestamp_raw_str = str(timestamp_raw)
 
             # Format time from picosends into MM:SS
@@ -147,8 +130,6 @@ def main():
                 continue
 
 
-
-
             # Type int for coordinates
             tmp_location = tuple(int(x) for x in words[2:5])
 
@@ -162,9 +143,12 @@ def main():
 
                 balls[this_ball]["position"] = this_ball + "position" + timestamp_raw_str
 
+                # Update the ball location
+                balls[this_ball]["location"] = tmp_location
 
                 # If the ball is OUT
                 if is_out(tmp_location):
+
 
                     #########################################
                     # Print ball position output
@@ -173,23 +157,20 @@ def main():
                     print_results_new(PREFIX_SO + this_ball, RDF_TYPE, PREFIX_SO + "BackupBall", timestamp_float_str, tmp_t_str)
                     #########################################
 
+
                     game_status = False or is_out(tmp_location)
 
-                    # Update the ball location
-                    balls[this_ball]["location"] = tmp_location
 
                     # If the ball was IN
-                    if balls[this_ball]["ball-in"]:
+                    if balls[this_ball]["in-field"]:
                         # Update ball status
-                        balls[this_ball]["ball-in"] = False
-                        #print("\n<<<<<<<<<<<< " + this_ball + " goes out of bounds at " + tmp_t_str + "\n")
+                        balls[this_ball]["in-field"] = False
+                        # Update game status
+                        game_status -= 1
 
-                        # Also set corresponding player and ball status to False or None, and print out end statements!!! ball-player, player-player, and offsides
-
-                        # Ball-Player:
-                        # If the ball was controlled previously by a player, make the change
+                        # If the ball was controlled previously by a player, void the possesion
                         if balls[this_ball]["player"]:
-                            assert(players[balls[this_ball]["player"]]["ball-possession"])
+                            assert(players[balls[this_ball]["player"]]["ball-possession"])  # can be commented if passed debug
                             players[balls[this_ball]["player"]]["ball-possession"] = False
                             balls[this_ball]["player"] = None
 
@@ -200,42 +181,40 @@ def main():
                 # If the ball is IN
                 else:
 
-                    game_status = True
-
                     #########################################
                     # Print ball position output
                     print_results_new(PREFIX_SO + this_ball, PREFIX_SO + "hasPosition", PREFIX_SO + balls[this_ball]["position"], timestamp_float_str, tmp_t_str)
                     print_results_new(PREFIX_SO + this_ball, RDF_TYPE, PREFIX_SO + "InFieldBall", timestamp_float_str, tmp_t_str)
                     #########################################
 
-                    # Update the ball location
-                    balls[this_ball]["location"] = tmp_location
 
                     # If the ball was OUT
-                    if not balls[this_ball]["ball-in"]:
-                        balls[this_ball]["ball-in"] = True
-                        #print("\n>>>>>>>>>>>>>> " + this_ball + " goes into the field at " + tmp_t_str + "\n")
-                    # Else, the ball was IN, do nothing
+                    if not balls[this_ball]["in-field"]:
+                        # Update game status
+                        game_status += 1
+                        # Update ball status
+                        balls[this_ball]["in-field"] = True
+                    # Else, the ball was IN, do nothing, but still do the rest steps below.
 
 
+                    #############################################
                     # Identify ball-player interference:
 
                     # Update each players distance to ball:
                     for p in players:
-                        # players[p]["distance-to-ball"] = get_distance(players[p]["location"], tmp_location)
-                        players[p]["distance-to-ball"] = min(get_distance(players[p]["left"], tmp_location), get_distance(players[p]["left"], tmp_location))
+                        players[p]["distance-to-ball"] = min(get_distance(players[p]["left"], tmp_location), get_distance(players[p]["right"], tmp_location))
 
                     # Find the player that is the closest to the ball
                     players_sorted = sorted(players.items(), key=lambda x: x[1]["distance-to-ball"])
                     nearest_player = players_sorted[0][0]
                     nearest_distance = players_sorted[0][1]["distance-to-ball"]
 
-                    # If the nearest player has >= 1000mm to the ball then nobody has the ball
-                    if nearest_distance >= BALL_CONTROL_DISTANCE:
+                    # If the nearest player is too far to the ball then nobody has the ball
+                    if nearest_distance >= BALL_TOUCH_DISTANCE:
                         balls[this_ball]["player"] = None
 
-                    # If the nearest player has < 1000mm to the ball then he has the ball
-                    if nearest_distance < BALL_CONTROL_DISTANCE:
+                    # If the nearest player is within ball touch distance to the ball then he touches the ball
+                    if nearest_distance < BALL_TOUCH_DISTANCE:
                         balls[this_ball]["player"] = nearest_player
                         players[nearest_player]["ball-possession"] = True
 
@@ -252,7 +231,7 @@ def main():
                         opponent_goal_line = teams[opponent]["goal-line"]
                         opponent_goal_line_sign = teams[opponent]["sign"]
 
-                        if teams[opponent]["second-last-player"] == None:
+                        if teams[opponent]["second-last-player"] is None:
                             continue
                         else:
                             second_last_opponent = teams[opponent]["second-last-player"]
@@ -264,11 +243,13 @@ def main():
                         print_results_new(PREFIX_SO + second_last_opponent, RDF_TYPE, PREFIX_SO + "SecondLastPlayer", timestamp_float_str,  tmp_t_str)
                         ##############################################
 
-                        distance_of_second_last_defender_to_opponent_goal_line = min(abs(players[second_last_opponent]["left"][1] - opponent_goal_line), abs(players[second_last_opponent]["right"][1] - opponent_goal_line))
-                        distance_of_ball_to_opponent_goal_line = abs(tmp_location[1] - opponent_goal_line)
+                        distance_of_second_last_defender_to_opponent_goal_line = min((players[second_last_opponent]["left"][1] - opponent_goal_line) * opponent_goal_line_sign,
+                                                                                     (players[second_last_opponent]["right"][1] - opponent_goal_line) * opponent_goal_line_sign)
+                        distance_of_ball_to_opponent_goal_line = (tmp_location[1] - opponent_goal_line) * opponent_goal_line_sign
 
                         for this_player in {k:v for (k,v) in players.items() if v["team"] == this_team}:
-                            distance_to_opponent_goal_line = min(abs(players[this_player]["left"][1] - opponent_goal_line), abs(players[this_player]["right"][1] - opponent_goal_line))
+                            distance_to_opponent_goal_line = min((players[this_player]["left"][1] - opponent_goal_line) * opponent_goal_line_sign,
+                                                                 (players[this_player]["right"][1] - opponent_goal_line) * opponent_goal_line_sign)
 
                             if distance_to_opponent_goal_line < HALF_LENGTH and distance_to_opponent_goal_line < distance_of_second_last_defender_to_opponent_goal_line and distance_to_opponent_goal_line < distance_of_ball_to_opponent_goal_line:
                                     players[this_player]["in-offside-position"] = True
@@ -287,10 +268,6 @@ def main():
 
             # When player data comes in:
             elif tmp_type == "player":
-
-                # Turn this back on when making sure end statements are printed when ball goes out of bounds
-                # if game_status == False:
-                #     continue
 
                 this_player = SID_MAP[words[0]]["label"]
                 this_leg = SID_MAP[words[0]]["leg"]
@@ -313,7 +290,8 @@ def main():
                 ###############################################
                 # Annotate player in own half
                 #
-                if players[this_player]["location"][1] > teams[this_team]["own-half-min"] and players[this_player]["location"][1] < teams[this_team]["own-half-max"]:
+                # if players[this_player]["location"][1] > teams[this_team]["own-half-min"] and players[this_player]["location"][1] < teams[this_team]["own-half-max"]:
+                if (players[this_player]["left"][1] - HALF_LINE) * teams[this_team]["sign"] < 0:
                     print_results_new(PREFIX_SO + this_player, RDF_TYPE, PREFIX_SO + "PlayerInOwnHalf", timestamp_float_str, tmp_t_str)
                 else:
                     print_results_new(PREFIX_SO + this_player, RDF_TYPE, PREFIX_SO + "PlayerNotInOwnHalf", timestamp_float_str, tmp_t_str)
@@ -379,7 +357,8 @@ def main():
                 this_referee = SID_MAP[words[0]]["label"]
                 this_leg = SID_MAP[words[0]]["leg"]
                 referees[this_referee][this_leg] = tmp_location
-                referees[this_referee]["location"] = get_average(referees[this_referee]["left"], referees[this_referee]["right"])
+                # referees[this_referee]["location"] = get_average(referees[this_referee]["left"], referees[this_referee]["right"])
+                referees[this_referee]["location"] = referees[this_referee]["left"]     # temporary
                 referees[this_referee]["position"] = this_referee + "position" + timestamp_raw_str
                 ###############################################
                 # and print
@@ -395,12 +374,10 @@ def main():
                 ###############################################
                 # and print
                 print_results_new(PREFIX_SO + this_glove, PREFIX_SO + "hasPosition", PREFIX_SO + gloves[this_glove]["position"], timestamp_float_str, tmp_t_str)
-                #print_results_new(PREFIX_SO + gloves[this_glove]["position"], RDF_TYPE, PREFIX_LITERATE + "GlovePosition", timestamp_float_str, tmp_t_str)
                 ###############################################
 
             else:
                 exit(tmp_type)
-
 
         #print("Total computation time elapsed: " + str(time.time() - t) + " seconds")
 
