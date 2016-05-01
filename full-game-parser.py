@@ -12,12 +12,19 @@ from parameters import *
 
 # Initial conditions:
 
-from output_time_intervals_1st_half import *
-VIDEO_START_TIMESTAMP = 10749277974056600
-GOAL_LINE_A = Y_MIN
-GOAL_LINE_B = Y_MAX
-SIGN_A = +1
-SIGN_B = -1
+# from output_time_intervals_1st_half import *
+# VIDEO_START_TIMESTAMP = 10749277974056600
+# GOAL_LINE_A = Y_MIN
+# GOAL_LINE_B = Y_MAX
+# SIGN_A = +1
+# SIGN_B = -1
+
+from output_time_intervals_2nd_half import *
+VIDEO_START_TIMESTAMP = 13085193764021900
+GOAL_LINE_A = Y_MAX
+GOAL_LINE_B = Y_MIN
+SIGN_A = -1
+SIGN_B = +1
 
 
 
@@ -123,11 +130,12 @@ def main():
                 output_file.close()
                 if time_interval_count < time_interval_max:
                     time_interval_count += 1
+                    output_file = open(OUTPUT_TIME_INTERVALS[time_interval_count]["file-name"], "w+")
+                    sys.stdout = output_file
+                    continue
                 else:
                     break
-                output_file = open(OUTPUT_TIME_INTERVALS[time_interval_count]["file-name"], "w+")
-                sys.stdout = output_file
-                continue
+
 
 
             # Type int for coordinates
