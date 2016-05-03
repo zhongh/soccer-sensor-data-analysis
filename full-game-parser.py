@@ -8,25 +8,7 @@ import sys
 from helpers import *
 from metadata import *
 from parameters import *
-
-
-# Initial conditions:
-
-# from output_time_intervals_1st_half import *
-# VIDEO_START_TIMESTAMP = 10749277974056600
-# GOAL_LINE_A = Y_MIN
-# GOAL_LINE_B = Y_MAX
-# SIGN_A = +1
-# SIGN_B = -1
-
-from output_time_intervals_2nd_half import *
-VIDEO_START_TIMESTAMP = 13085193764021900
-GOAL_LINE_A = Y_MAX
-GOAL_LINE_B = Y_MIN
-SIGN_A = -1
-SIGN_B = +1
-
-
+from output_time_intervals import *
 
 
 def main():
@@ -36,7 +18,26 @@ def main():
     # Command line arguments
     parser = argparse.ArgumentParser()
     parser.add_argument('input', metavar='INPUT', help='input file')
+    parser.add_argument('half', metavar='HALF_NUMBER', help='which half to input', type=int, choices=[1, 2])
     args = parser.parse_args()
+
+    if args.half == 1:
+        OUTPUT_TIME_INTERVALS = OUTPUT_TIME_INTERVALS_1ST
+        VIDEO_START_TIMESTAMP = 10749277974056600
+        GOAL_LINE_A = Y_MIN
+        GOAL_LINE_B = Y_MAX
+        SIGN_A = +1
+        SIGN_B = -1
+    elif args.half == 2:
+        OUTPUT_TIME_INTERVALS = OUTPUT_TIME_INTERVALS_2ND
+        VIDEO_START_TIMESTAMP = 13085193764021900
+        GOAL_LINE_A = Y_MAX
+        GOAL_LINE_B = Y_MIN
+        SIGN_A = -1
+        SIGN_B = +1
+    else:
+        exit("Incorrect half index!")
+
 
     # Open input file
     with open(args.input, "r") as f:
@@ -288,7 +289,7 @@ def main():
                 #
                 print_results_new(PREFIX_SO + this_player, PREFIX_SO + "hasPosition", PREFIX_SO + players[this_player]["position"], timestamp_float_str, tmp_t_str)
                 if not game_status:
-                    print_results_new(PREFIX_SO + players[this_player]["position"], RDF_TYPE, PREFIX_LITERATE + "OffsideIrreleventPosition", timestamp_float_str, tmp_t_str)
+                    print_results_new(PREFIX_SO + players[this_player]["position"], RDF_TYPE, PREFIX_LITERATE + "OffsideIrrelevantPosition", timestamp_float_str, tmp_t_str)
                 ###############################################
 
                 # Update player location
